@@ -53,7 +53,7 @@ def responsive_container(
     """
     style_dict = {
         "width": max_width,
-        "margin": me.Margin.symmetric(
+        "margin": me.Margin.all(
             horizontal=horizontal_margin,
             vertical=vertical_margin,
         ) if horizontal_margin != 0 else me.Margin(top=vertical_margin, bottom=vertical_margin, left=0, right=0),
@@ -132,7 +132,7 @@ RESPONSIVE_ROOT_STYLE = me.Style(
 RESPONSIVE_HEADER_STYLE = me.Style(
     padding=me.Padding.all(16),
     background="white",
-    border_bottom="1px solid #e0e0e0",
+    border="0 0 1px 0 solid #e0e0e0",
     position="sticky",
     top=0,
     z_index=100,
@@ -141,7 +141,7 @@ RESPONSIVE_HEADER_STYLE = me.Style(
 RESPONSIVE_MAIN_CONTENT_STYLE = me.Style(
     flex_grow=1,
     width="min(1200px, 100%)",
-    margin=me.Margin.symmetric(horizontal="auto"),
+    margin=me.Margin.all(0),
     padding=me.Padding.symmetric(horizontal=16, vertical=24),
 )
 
@@ -149,7 +149,7 @@ RESPONSIVE_CHAT_INPUT_STYLE = me.Style(
     position="sticky",
     bottom=0,
     background="white",
-    border_top="1px solid #e0e0e0",
+    border="1px 0 0 0 solid #e0e0e0",
     padding=me.Padding.all(16),
     width="100%",
 )
@@ -157,7 +157,7 @@ RESPONSIVE_CHAT_INPUT_STYLE = me.Style(
 RESPONSIVE_CHAT_BUBBLE_CONTAINER = me.Style(
     display="flex",
     width="100%",
-    margin=me.Margin.symmetric(vertical=8),
+    margin=me.Margin.all(vertical=8),
 )
 
 RESPONSIVE_INPUT_WRAPPER_STYLE = me.Style(
@@ -167,7 +167,7 @@ RESPONSIVE_INPUT_WRAPPER_STYLE = me.Style(
     border="1px solid #e0e0e0",
     display="flex",
     width="min(800px, 100%)",
-    margin=me.Margin.symmetric(horizontal="auto"),
+    margin=me.Margin.all(0),
     align_items="center",
     gap=8,
 )

@@ -10,7 +10,7 @@ def simple_test():
     with me.box(
         style=me.Style(
             padding=me.Padding.all(24),
-            margin=me.Margin.symmetric(horizontal="auto", vertical=0),
+            margin=me.Margin.all(0),
         )
     ):
         me.text("Teste Simples - Sem Erros")
