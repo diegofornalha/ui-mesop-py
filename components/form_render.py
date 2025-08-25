@@ -75,14 +75,14 @@ def is_form(message: StateMessage) -> bool:
 
 
 def form_sent(message: StateMessage, app_state: AppState) -> bool:
-    return message.messageid in app_state.form_responses
+    return message.messageId in app_state.form_responses
 
 
 def render_form(message: StateMessage, app_state: AppState):
     """Renders the form or the data entered in a submitted form"""
     # Check if the form was completed, if so, render the content as a card
-    if message.messageid in app_state.completed_forms:
-        render_form_card(message, app_state.completed_forms[message.messageid])
+    if message.messageId in app_state.completed_forms:
+        render_form_card(message, app_state.completed_forms[message.messageId])
         return
     # Otherwise, get the form structure.
     instructions, form_structure = generate_form_elements(message)
@@ -93,19 +93,19 @@ def render_form(message: StateMessage, app_state: AppState):
         data[element.name] = element.value
 
     state = me.state(State)
-    if message.messageid not in state.forms:
+    if message.messageId not in state.forms:
         form = FormState(
-            messageid=message.messageid,
+            messageid=message.messageId,
             data=data,
             errors={},
             elements=form_structure,
         )
         try:
-            state.forms[message.messageid] = form_state_to_string(form)
+            state.forms[message.messageId] = form_state_to_string(form)
         except Exception as e:
             print('Failed to serialize form', e, form)
     render_structure(
-        message.messageid, message.taskid, form_structure, instructions
+        message.messageId, message.taskId, form_structure, instructions
     )
 
 

@@ -190,16 +190,30 @@ def convert_message_to_state(message: Message) -> StateMessage:
     if not message:
         return StateMessage()
 
-    # Verificar se role é enum ou string
-    if hasattr(message.role, 'name'):
-        role_value = message.role.name
+    # Verificar se role existe e é enum ou string
+    if hasattr(message, 'role') and message.role is not None:
+        if hasattr(message.role, 'name'):
+            role_value = message.role.name
+            print(f"[DEBUG] Message {message.messageId}: Role enum = {role_value}")
+        else:
+            role_value = str(message.role)
+            print(f"[DEBUG] Message {message.messageId}: Role string = {role_value}")
     else:
-        role_value = str(message.role)
+        # Tentar detectar se é resposta do agente pelo author
+        if hasattr(message, 'author') and 'agent' in str(message.author).lower():
+            role_value = 'agent'
+            print(f"[DEBUG] Message {message.messageId}: Detectado como agent pelo author: {message.author}")
+        else:
+            role_value = 'user'  # Valor padrão
+            print(f"[DEBUG] Message {message.messageId}: Usando padrão user - role não encontrado")
+
+    # Log adicional para debug
+    print(f"[DEBUG] Final role for message {message.messageId}: {role_value}")
 
     return StateMessage(
         messageId=message.messageId,  # Usando camelCase padrão
         contextId=message.contextId if message.contextId else '',
-        taskId=message.taskId if hasattr(message, 'taskId') else '',
+        taskId=getattr(message, 'taskId', '') or '',  # Garante string vazia se None
         role=role_value,
         content=extract_content(message.parts),
     )
@@ -209,9 +223,9 @@ def convert_conversation_to_state(
     conversation: Conversation,
 ) -> StateConversation:
     return StateConversation(
-        conversationId=conversation.conversationid,  # Fonte ainda usa lowercase
+        conversationId=conversation.conversationId,  # Usar campo real camelCase
         conversationName=conversation.name,
-        isActive=conversation.isactive,
+        isActive=conversation.isActive,  # Usar campo real camelCase
         messageIds=[extract_message_id(x) for x in conversation.messages],
     )
 
@@ -251,11 +265,14 @@ def convert_task_to_state(task: Task) -> StateTask:
 
 
 def convert_event_to_state(event: Event) -> StateEvent:
-    # Verificar se role é enum ou string
-    if hasattr(event.content.role, 'name'):
-        role_value = event.content.role.name
+    # Verificar se role existe e é enum ou string
+    if hasattr(event.content, 'role'):
+        if hasattr(event.content.role, 'name'):
+            role_value = event.content.role.name
+        else:
+            role_value = str(event.content.role)
     else:
-        role_value = str(event.content.role)
+        role_value = 'agent'  # Valor padrão para eventos
     
     return StateEvent(
         contextId=extract_message_conversation(event.content),

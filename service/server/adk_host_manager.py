@@ -125,31 +125,35 @@ class ADKHostManager(ApplicationManager):
                 self._task_map = {}
 
     def sanitize_message(self, message: Message) -> Message:
-        if message.context_id:
-            conversation = self.get_conversation(message.context_id)
+        # Suportar ambos contextId e context_id para compatibilidade
+        context_id = getattr(message, 'contextId', getattr(message, 'context_id', None))
+        if context_id:
+            conversation = self.get_conversation(context_id)
             if not conversation:
                 return message
             # Check if the last event in the conversation was tied to a task.
             if conversation.messages:
-                taskid = conversation.messages[-1].taskid
+                taskid = conversation.messages[-1].taskId
                 if taskid and task_still_open(
                     next(
                         filter(lambda x: x and x.id == taskid, self._tasks),
                         None,
                     )
                 ):
-                    message.taskid = taskid
+                    message.taskId = taskid
         return message
 
     async def process_message(self, message: Message):
-        print(f"[DEBUG] Processing message: {message.messageid}")
-        messageid = message.messageid
-        if messageid:
-            self._pending_messageids.append(messageid)
-            print(f"[DEBUG] Added to pending: {messageid}")
-        contextid = message.context_id
-        print(f"[DEBUG] Context ID: {contextid}")
-        conversation = self.get_conversation(contextid)
+        # Suportar ambos messageId e messageid para compatibilidade
+        message_id = getattr(message, 'messageId', getattr(message, 'messageid', None))
+        print(f"[DEBUG] Processing message: {message_id}")
+        if message_id:
+            self._pending_messageIds.append(message_id)
+            print(f"[DEBUG] Added to pending: {message_id}")
+        # Suportar ambos contextId e context_id
+        context_id = getattr(message, 'contextId', getattr(message, 'context_id', None))
+        print(f"[DEBUG] Context ID: {context_id}")
+        conversation = self.get_conversation(context_id)
         print(f"[DEBUG] Got conversation: {conversation is not None}")
         self._messages.append(message)
         if conversation:
@@ -165,14 +169,14 @@ class ADKHostManager(ApplicationManager):
         final_event = None
         # Determine if a task is to be resumed.
         session = await self._session_service.get_session(
-            app_name='A2A', user_id='test_user', session_id=contextid
+            app_name='A2A', user_id='test_user', session_id=context_id
         )
-        taskid = message.taskid
+        taskid = message.taskId
         # Update state must happen in an event
         state_update = {
             'taskid': taskid,
-            'context_id': contextid,
-            'messageid': message.messageid,
+            'contextId': context_id,
+            'messageId': message_id,
         }
         # Need to upsert session state now, only way is to append an event.
         await self._session_service.append_event(
@@ -184,11 +188,11 @@ class ADKHostManager(ApplicationManager):
                 actions=ADKEventActions(state_delta=state_update),
             ),
         )
-        print(f"[DEBUG] Starting runner for context: {contextid}")
+        print(f"[DEBUG] Starting runner for context: {context_id}")
         try:
             async for event in self._host_runner.run_async(
                 user_id=self.user_id,
-                session_id=contextid,
+                session_id=context_id,
                 new_message=self.adk_content_from_message(message),
             ):
                 print(f"[DEBUG] Received event from runner: {event.author}")
@@ -202,7 +206,7 @@ class ADKHostManager(ApplicationManager):
                     id=event.id,
                     actor=event.author,
                     content=await self.adk_content_to_message(
-                        event.content, contextid, taskid
+                        event.content, context_id, taskid
                     ),
                     timestamp=event.timestamp,
                 )
@@ -223,19 +227,19 @@ class ADKHostManager(ApplicationManager):
                 taskid = event.actions.state_delta['taskid']
             final_event.content.role = 'model'
             response = await self.adk_content_to_message(
-                final_event.content, contextid, taskid
+                final_event.content, context_id, taskid
             )
             self._messages.append(response)
 
         if conversation and response:
             conversation.messages.append(response)
-            print(f"[DEBUG] Added response to conversation: {contextid}")
+            print(f"[DEBUG] Added response to conversation: {context_id}")
         else:
-            print(f"[DEBUG] No response or conversation for: {contextid}")
+            print(f"[DEBUG] No response or conversation for: {context_id}")
         
-        if messageid in self._pending_messageids:
-            self._pending_messageids.remove(messageid)
-            print(f"[DEBUG] Removed from pending: {messageid}")
+        if message_id in self._pending_messageIds:
+            self._pending_messageIds.remove(message_id)
+            print(f"[DEBUG] Removed from pending: {message_id}")
 
     def add_task(self, task: Task):
         self._tasks.append(task)
@@ -271,7 +275,7 @@ class ADKHostManager(ApplicationManager):
 
     def emit_event(self, task: TaskCallbackArg, agent_card: AgentCard):
         content = None
-        contextid = task.context_id
+        context_id = getattr(task, 'contextId', getattr(task, 'context_id', None))
         if isinstance(task, TaskStatusUpdateEvent):
             if task.status.message:
                 content = task.status.message
@@ -279,16 +283,16 @@ class ADKHostManager(ApplicationManager):
                 content = Message(
                     parts=[Part(root=TextPart(text=str(task.status.state)))],
                     role=Role.agent,
-                    messageid=str(uuid.uuid4()),
-                    contextid=contextid,
-                    taskid=task.taskid,
+                    messageId=str(uuid.uuid4()),
+                    contextId=context_id,
+                    taskid=task.taskId,
                 )
         elif isinstance(task, TaskArtifactUpdateEvent):
             content = Message(
                 parts=task.artifact.parts,
                 role=Role.agent,
-                messageid=str(uuid.uuid4()),
-                contextid=contextid,
+                messageId=str(uuid.uuid4()),
+                contextId=context_id,
                 taskid=task.taskid,
             )
         elif task.status and task.status.message:
@@ -300,17 +304,17 @@ class ADKHostManager(ApplicationManager):
             content = Message(
                 parts=parts,
                 role=Role.agent,
-                messageid=str(uuid.uuid4()),
+                messageId=str(uuid.uuid4()),
                 taskid=task.id,
-                contextid=contextid,
+                contextId=context_id,
             )
         else:
             content = Message(
                 parts=[Part(root=TextPart(text=str(task.status.state)))],
                 role=Role.agent,
-                messageid=str(uuid.uuid4()),
+                messageId=str(uuid.uuid4()),
                 taskid=task.id,
-                contextid=contextid,
+                contextId=context_id,
             )
         if content:
             self.add_event(
@@ -324,20 +328,24 @@ class ADKHostManager(ApplicationManager):
 
     def attach_message_to_task(self, message: Message | None, taskid: str):
         if message:
-            self._task_map[message.messageid] = taskid
+            # Suportar ambos messageId e messageid
+            message_id = getattr(message, 'messageId', getattr(message, 'messageid', None))
+            if message_id:
+                self._task_map[message_id] = taskid
 
     def insert_message_history(self, task: Task, message: Message | None):
         if not message:
             return
         if task.history is None:
             task.history = []
-        messageid = message.messageid
-        if not messageid:
+        # Suportar ambos messageId e messageid
+        message_id = getattr(message, 'messageId', getattr(message, 'messageid', None))
+        if not message_id:
             return
         if task.history and (
             task.status.message
-            and task.status.message.messageid
-            not in [x.messageid for x in task.history]
+            and getattr(task.status.message, 'messageId', getattr(task.status.message, 'messageid', None))
+            not in [getattr(x, 'messageId', getattr(x, 'messageid', None)) for x in task.history]
         ):
             task.history.append(task.status.message)
         elif not task.history and task.status.message:
@@ -345,31 +353,31 @@ class ADKHostManager(ApplicationManager):
         else:
             print(
                 'Message id already in history',
-                task.status.message.messageid if task.status.message else '',
+                getattr(task.status.message, 'messageId', getattr(task.status.message, 'messageid', '')) if task.status.message else '',
                 task.history,
             )
 
     def add_or_get_task(self, event: TaskCallbackArg):
         taskid = None
         if isinstance(event, Message):
-            taskid = event.taskid
+            taskid = event.taskId
         elif isinstance(event, Task):
             taskid = event.id
         else:
-            taskid = event.taskid
+            taskid = event.taskId
         if not taskid:
             taskid = str(uuid.uuid4())
         current_task = next(
             filter(lambda x: x.id == taskid, self._tasks), None
         )
         if not current_task:
-            contextid = event.context_id
+            context_id = getattr(event, 'contextId', getattr(event, 'context_id', None))
             current_task = Task(
                 id=taskid,
                 # initialize with submitted
                 status=TaskStatus(state=TaskState.submitted),
                 artifacts=[],
-                contextid=contextid,
+                contextId=context_id,
             )
             self.add_task(current_task)
             return current_task
@@ -420,7 +428,7 @@ class ADKHostManager(ApplicationManager):
             return None
         return next(
             filter(
-                lambda c: c and c.conversationid == conversationid,
+                lambda c: c and c.conversationId == conversationid,
                 self._conversations,
             ),
             None,
@@ -428,17 +436,17 @@ class ADKHostManager(ApplicationManager):
 
     def get_pending_messages(self) -> list[tuple[str, str]]:
         rval = []
-        for messageid in self._pending_messageids:
-            if messageid in self._task_map:
-                taskid = self._task_map[messageid]
+        for message_id in self._pending_messageIds:
+            if message_id in self._task_map:
+                taskid = self._task_map[message_id]
                 task = next(
                     filter(lambda x: x.id == taskid, self._tasks), None
                 )
                 if not task:
-                    rval.append((messageid, ''))
+                    rval.append((message_id, ''))
                 elif task.history and task.history[-1].parts:
                     if len(task.history) == 1:
-                        rval.append((messageid, 'Working...'))
+                        rval.append((message_id, 'Working...'))
                     else:
                         part = task.history[-1].parts[0]
                         # Handle both dict and object formats
@@ -459,12 +467,12 @@ class ADKHostManager(ApplicationManager):
                         
                         rval.append(
                             (
-                                messageid,
+                                message_id,
                                 text if text else 'Working...',
                             )
                         )
             else:
-                rval.append((messageid, ''))
+                rval.append((message_id, ''))
         return rval
 
     def register_agent(self, url):
@@ -541,7 +549,7 @@ class ADKHostManager(ApplicationManager):
     async def adk_content_to_message(
         self,
         content: types.Content,
-        contextid: str | None,
+        context_id: str | None,
         taskid: str | None,
     ) -> Message:
         parts: list[Part] = []
@@ -549,9 +557,9 @@ class ADKHostManager(ApplicationManager):
             return Message(
                 parts=[],
                 role=content.role if content.role == Role.user else Role.agent,
-                contextid=contextid,
+                contextId=context_id,
                 taskid=taskid,
-                messageid=str(uuid.uuid4()),
+                messageId=str(uuid.uuid4()),
             )
         for part in content.parts:
             if part.text:
@@ -602,7 +610,7 @@ class ADKHostManager(ApplicationManager):
             elif part.function_response:
                 parts.extend(
                     await self._handle_function_response(
-                        part, contextid, taskid
+                        part, context_id, taskid
                     )
                 )
             else:
@@ -610,13 +618,13 @@ class ADKHostManager(ApplicationManager):
         return Message(
             role=content.role if content.role == Role.user else Role.agent,
             parts=parts,
-            contextid=contextid,
+            contextId=context_id,
             taskid=taskid,
-            messageid=str(uuid.uuid4()),
+            messageId=str(uuid.uuid4()),
         )
 
     async def _handle_function_response(
-        self, part: types.Part, contextid: str | None, taskid: str | None
+        self, part: types.Part, context_id: str | None, taskid: str | None
     ) -> list[Part]:
         parts = []
         try:
@@ -632,7 +640,7 @@ class ADKHostManager(ApplicationManager):
                     if 'artifact-file-id' in p.data:
                         file_part = await self._artifact_service.load_artifact(
                             user_id=self.user_id,
-                            session_id=contextid,
+                            session_id=context_id,
                             app_name=self.app_name,
                             filename=p.data['artifact-file-id'],
                         )
@@ -675,9 +683,10 @@ class ADKHostManager(ApplicationManager):
 
 
 def get_message_id(m: Message | None) -> str | None:
-    if not m or not m.metadata or 'messageid' not in m.metadata:
+    if not m or not m.metadata:
         return None
-    return m.metadata['messageid']
+    # Tentar messageId primeiro (padrão), depois messageid (compatibilidade)
+    return m.metadata.get('messageId', m.metadata.get('messageid', None))
 
 
 def task_still_open(task: Task | None) -> bool:

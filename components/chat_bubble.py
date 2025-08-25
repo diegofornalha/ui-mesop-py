@@ -8,12 +8,12 @@ def chat_bubble(message: StateMessage, key: str):
     """Chat bubble component"""
     app_state = me.state(AppState)
     show_progress_bar = (
-        message.messageid in app_state.background_tasks
-        or message.messageid in app_state.message_aliases.values()
+        message.messageId in app_state.background_tasks
+        or message.messageId in app_state.message_aliases.values()
     )
     progress_text = ''
     if show_progress_bar:
-        progress_text = app_state.background_tasks[message.messageid]
+        progress_text = app_state.background_tasks[message.messageId]
     if not message.content:
         print('No message content')
     for pair in message.content:

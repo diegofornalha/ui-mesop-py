@@ -54,32 +54,32 @@ class InMemoryFakeAgentManager(ApplicationManager):
         return c
 
     def sanitize_message(self, message: Message) -> Message:
-        conversation = self.get_conversation(message.context_id)
+        conversation = self.get_conversation(message.contextId)
         if not conversation:
             return message
         # Check if the last event in the conversation was tied to a task.
         if conversation.messages:
-            if conversation.messages[-1].taskid and task_still_open(
+            if conversation.messages[-1].taskId and task_still_open(
                 next(
                     filter(
-                        lambda x: x.id == conversation.messages[-1].taskid,
+                        lambda x: x.id == conversation.messages[-1].taskId,
                         self._tasks,
                     ),
                     None,
                 )
             ):
-                message.taskid = conversation.messages[-1].taskid
+                message.taskId = conversation.messages[-1].taskId
 
         return message
 
     async def process_message(self, message: Message):
         self._messages.append(message)
-        messageid = message.messageid
-        contextid = message.context_id or ''
-        taskid = message.taskid or ''
+        messageid = message.messageId
+        contextid = message.contextId or ''
+        taskid = message.taskId or ''
         if messageid:
             self._pending_messageids.append(messageid)
-        conversation = self.get_conversation(context_id)
+        conversation = self.get_conversation(contextid)
         if conversation:
             conversation.messages.append(message)
         self._events.append(
@@ -159,7 +159,7 @@ class InMemoryFakeAgentManager(ApplicationManager):
             return None
         return next(
             filter(
-                lambda c: c and c.conversationid == conversationid,
+                lambda c: c and c.conversationId == conversationid,
                 self._conversations,
             ),
             None,

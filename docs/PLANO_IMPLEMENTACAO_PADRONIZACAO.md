@@ -19,12 +19,15 @@ Este documento detalha o plano de implementação para a padronização de nomen
 
 ### **Arquitetura da Solução**
 ```python
-# ✅ PADRÃO CORRETO
+# ✅ PADRÃO CORRETO PARA PYDANTIC V1
 class Message(BaseModel):
-    contextId: str = Field(alias="contextId")  # Campo principal camelCase
+    contextId: str = Field(alias="context_id")  # Campo principal camelCase com alias snake_case
+    
+    class Config:
+        populate_by_name = True  # Permite entrada em ambos os formatos
     
     @property
-    def context_id(self) -> str:  # Alias Python snake_case
+    def context_id(self) -> str:  # Propriedade Python snake_case
         return self.contextId
 ```
 
@@ -45,6 +48,9 @@ class Message(BaseModel):
 class Message(BaseModel):
     contextId: Optional[str] = Field(default=None, alias="context_id")
     
+    class Config:
+        populate_by_name = True  # Permite entrada em ambos os formatos
+    
     @property
     def context_id(self) -> Optional[str]:
         return self.contextId
@@ -63,9 +69,12 @@ class MessageInfoFixed(BaseModel):
 
 # DEPOIS
 class MessageInfoFixed(BaseModel):
-    contextId: str = Field(alias="contextId")
+    contextId: str = Field(alias="context_id")
     
-    # Remover normalização manual - Pydantic faz automaticamente
+    class Config:
+        populate_by_name = True  # Permite entrada em ambos os formatos
+    
+    # Remover normalização manual - Pydantic v1 faz automaticamente via aliases
 ```
 
 #### **1.3 Testes da Fase 1**
@@ -170,16 +179,18 @@ def adk_content_from_message(self, message: Message) -> types.Content:
 class MessagePatched(BaseModel):
     context_id: Optional[str] = Field(default=None, alias="contextId")
     
-    @model_validator(mode='before')
-    @classmethod
-    def normalize_fields(cls, values):
+    @validator('*', pre=True, always=True)
+    def normalize_fields(cls, v, values):
         # Normalização complexa com múltiplas variações...
 
 # DEPOIS
 class MessagePatched(BaseModel):
-    contextId: Optional[str] = Field(default=None, alias="contextId")
+    contextId: Optional[str] = Field(default=None, alias="context_id")
     
-    # Remover normalização manual - Pydantic faz automaticamente
+    class Config:
+        populate_by_name = True  # Permite entrada em ambos os formatos
+    
+    # Remover normalização manual - Pydantic v1 faz automaticamente via aliases
     # Manter apenas validações essenciais
 ```
 

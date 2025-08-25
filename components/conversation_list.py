@@ -15,10 +15,10 @@ def conversation_list(conversations: list[StateConversation]):
         'Messages': [],
     }
     for conversation in conversations:
-        df_data['ID'].append(conversation.conversationid)
-        df_data['Name'].append(conversation.conversationname)
-        df_data['Status'].append('Open' if conversation.isactive else 'Closed')
-        df_data['Messages'].append(len(conversation.messageids))
+        df_data['ID'].append(conversation.conversationId)
+        df_data['Name'].append(conversation.conversationName)
+        df_data['Status'].append('Open' if conversation.isActive else 'Closed')
+        df_data['Messages'].append(len(conversation.messageIds))
     df = pd.DataFrame(
         pd.DataFrame(df_data), columns=['ID', 'Name', 'Status', 'Messages']
     )
@@ -61,7 +61,7 @@ async def add_conversation(e: me.ClickEvent):  # pylint: disable=unused-argument
     me.state(AppState).messages = []
     me.navigate(
         '/conversation',
-        query_params={'conversationid': response.conversationid},
+        query_params={'conversationid': response.conversationId},
     )
     yield
 
@@ -69,7 +69,7 @@ async def add_conversation(e: me.ClickEvent):  # pylint: disable=unused-argument
 def on_click(e: me.TableClickEvent):
     state = me.state(AppState)
     conversation = state.conversations[e.row_index]
-    state.current_conversation_id = conversation.conversationid
-    me.query_params.update({'conversationid': conversation.conversationid})
+    state.current_conversation_id = conversation.conversationId
+    me.query_params.update({'conversationid': conversation.conversationId})
     me.navigate('/conversation', query_params=me.query_params)
     yield

@@ -226,14 +226,16 @@ git checkout HEAD~1 -- state/
 ## 📝 **NOTAS IMPORTANTES**
 
 ### **Padrão de Nomenclatura**
-- **Externo:** `contextId` (camelCase) para APIs e JSON
+- **Externo:** `contextId` (camelCase) para APIs e JSON (A2A Protocol)
 - **Interno:** `context_id` (snake_case) como propriedade Python
-- **Validação:** Aliases Pydantic para conversão automática
+- **Validação:** Aliases Pydantic v1 para conversão automática
+- **Configuração:** `Config.populate_by_name = True` para compatibilidade
 
 ### **Compatibilidade**
 - **Retrocompatibilidade:** Código existente deve continuar funcionando
 - **APIs Externas:** Manter formato esperado pelo A2A Protocol
 - **Google ADK:** Garantir comunicação sem erros
+- **Mesop:** Compatibilidade total com Pydantic v1.10.13
 
 ---
 

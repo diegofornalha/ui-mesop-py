@@ -41,11 +41,11 @@ if PYDANTIC_V2:
         )
         
         # Campos do modelo
-        messageId: str = Field(default="", alias="messageId")
+        messageId: str = Field(default="")
         content: str = Field(default="")
         author: str = Field(default="")
         timestamp: float = Field(default=0.0)
-        context_id: Optional[str] = Field(default=None, alias="contextId")
+        contextId: Optional[str] = Field(default=None, alias="context_id")
         parts: List[Any] = Field(default_factory=list)
         role: Optional[str] = Field(default=None)
         metadata: Optional[Dict[str, Any]] = Field(default=None)

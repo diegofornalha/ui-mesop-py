@@ -29,5 +29,5 @@ test_image = Message(
 
 
 def make_test_image(context_id: str) -> Message:
-    test_image.context_id = context_id
+    test_image.contextId = context_id  # Usar o campo principal, não a propriedade
     return test_image

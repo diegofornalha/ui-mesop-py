@@ -5,7 +5,7 @@ Resolve o problema de messageId vs messageid.
 
 from typing import Annotated, Any, Literal, Optional, Union, List, Tuple
 from uuid import uuid4
-from pydantic import BaseModel, Field, TypeAdapter, model_validator
+from pydantic import BaseModel, Field, TypeAdapter, validator
 
 # Importar MessagePatched se disponível
 try:
@@ -35,42 +35,47 @@ class Message(BaseModel):
     contextId: Optional[str] = Field(default=None, alias="context_id")  # Padrão camelCase com alias Python
     parts: List[Any] = Field(default_factory=list)
     
-    @model_validator(mode='before')
-    @classmethod
-    def normalize_fields(cls, values):
-        """Normaliza variações de campos para Message"""
-        if isinstance(values, dict):
-            # Normalizar messageId - aceitar todas as variações
-            for key in ['messageid', 'message_id', 'message_Id', 'MessageId', 'id']:
-                if key in values and 'messageId' not in values:
-                    values['messageId'] = values.pop(key)
-            
-            # Se ainda não tiver messageId, criar um
-            if 'messageId' not in values and 'id' not in values:
-                values['messageId'] = str(uuid4())
-            
-            # Normalizar text/content
-            for key in ['text', 'message', 'body']:
-                if key in values and 'content' not in values:
-                    values['content'] = values.pop(key)
-            
-            # Normalizar author
-            for key in ['user', 'userId', 'user_id', 'sender']:
-                if key in values and 'author' not in values:
-                    values['author'] = values.pop(key)
-            
-            # contextId é tratado automaticamente pelo alias Pydantic
-                    
-        return values
+    def __init__(self, **data):
+        """Override init para normalizar campos"""
+        # Normalizar messageId - aceitar todas as variações
+        for key in ['messageid', 'message_id', 'message_Id', 'MessageId', 'id']:
+            if key in data and 'messageId' not in data:
+                data['messageId'] = data.pop(key)
+        
+        # Se ainda não tiver messageId, criar um
+        if 'messageId' not in data and 'id' not in data:
+            data['messageId'] = str(uuid4())
+        
+        # Normalizar text/content
+        for key in ['text', 'message', 'body']:
+            if key in data and 'content' not in data:
+                data['content'] = data.pop(key)
+        
+        # Normalizar author
+        for key in ['user', 'userId', 'user_id', 'sender']:
+            if key in data and 'author' not in data:
+                data['author'] = data.pop(key)
+        
+        # contextId é tratado automaticamente pelo alias Pydantic
+        
+        # Chamar o init original
+        super().__init__(**data)
     
-    # Propriedade para compatibilidade
+    # Propriedades Python MUTÁVEIS - retornam referências diretas
     @property
-    def messageid(self) -> str:
+    def message_id_python(self) -> str:
+        """Propriedade Python - compatibilidade snake_case"""
         return self.messageId
     
     @property
-    def id(self) -> str:
-        return self.messageId
+    def context_id_python(self) -> str:
+        """Propriedade Python - compatibilidade snake_case"""
+        return self.contextId or ""
+    
+    @property
+    def parts_python(self) -> list:
+        """Propriedade Python MUTÁVEL - retorna referência direta à lista"""
+        return self.parts  # ✅ Retorna referência, permite append/extend
 
 
 class Task(BaseModel):
@@ -108,28 +113,31 @@ class JSONRPCResponse(JSONRPCMessage):
 
 class ConversationFixed(BaseModel):
     """Conversation com nomenclatura consistente"""
-    conversationid: str
-    isactive: bool
+    conversationId: str = Field(alias="conversationid")  # Campo em camelCase com alias
+    isActive: bool = Field(alias="isactive")
     name: str = ''
     task_ids: List[str] = Field(default_factory=list)
     messages: List[Any] = Field(default_factory=list)  # Será List[Message] ou List[MessagePatched]
     
-    @model_validator(mode='before')
-    @classmethod
-    def normalize_fields(cls, values):
-        """Normaliza variações de campos"""
-        if isinstance(values, dict):
-            # Aceitar variações de conversationid
-            for key in ['conversationId', 'conversation_id', 'conversationID']:
-                if key in values and 'conversationid' not in values:
-                    values['conversationid'] = values.pop(key)
-            
-            # Aceitar variações de isactive
-            for key in ['isActive', 'is_active', 'active']:
-                if key in values and 'isactive' not in values:
-                    values['isactive'] = values.pop(key)
-        
-        return values
+    class Config:
+        populate_by_name = True
+        allow_population_by_field_name = True
+    
+    # Propriedades Python MUTÁVEIS - retornam referências diretas
+    @property
+    def conversation_id_python(self) -> str:
+        """Propriedade Python - compatibilidade snake_case"""
+        return self.conversationId
+    
+    @property
+    def is_active_python(self) -> bool:
+        """Propriedade Python - compatibilidade snake_case"""
+        return self.isActive
+    
+    @property
+    def messages_python(self) -> list:
+        """Propriedade Python MUTÁVEL - retorna referência direta à lista"""
+        return self.messages  # ✅ Retorna referência, permite append/extend
 
 
 class EventFixed(BaseModel):
@@ -139,17 +147,15 @@ class EventFixed(BaseModel):
     content: Any  # Será Message ou MessagePatched
     timestamp: float
     
-    @model_validator(mode='before')
-    @classmethod
-    def normalize_fields(cls, values):
-        """Normaliza variações de campos"""
-        if isinstance(values, dict):
-            # Aceitar variações de id
-            for key in ['eventId', 'event_id', 'eventID']:
-                if key in values and 'id' not in values:
-                    values['id'] = values.pop(key)
+    def __init__(self, **data):
+        """Override init para normalizar campos"""
+        # Aceitar variações de id
+        for key in ['eventId', 'event_id', 'eventID']:
+            if key in data and 'id' not in data:
+                data['id'] = data.pop(key)
         
-        return values
+        # Chamar o init original
+        super().__init__(**data)
 
 
 class MessageInfoFixed(BaseModel):
@@ -157,22 +163,20 @@ class MessageInfoFixed(BaseModel):
     messageId: str  # CORRIGIDO: era 'messageid', agora é 'messageId'
     contextId: str  # CORRIGIDO: era 'contextid', agora é 'contextId'
     
-    @model_validator(mode='before')
-    @classmethod
-    def normalize_fields(cls, values):
-        """Aceita múltiplas variações dos campos"""
-        if isinstance(values, dict):
-            # Normalizar messageId
-            for key in ['messageid', 'message_id', 'message_Id', 'MessageId']:
-                if key in values and 'messageId' not in values:
-                    values['messageId'] = values.pop(key)
-            
-            # Normalizar contextId
-            for key in ['contextid', 'context_id', 'context_Id', 'ContextId']:
-                if key in values and 'contextId' not in values:
-                    values['contextId'] = values.pop(key)
+    def __init__(self, **data):
+        """Override init para normalizar campos"""
+        # Normalizar messageId
+        for key in ['messageid', 'message_id', 'message_Id', 'MessageId']:
+            if key in data and 'messageId' not in data:
+                data['messageId'] = data.pop(key)
         
-        return values
+        # Normalizar contextId
+        for key in ['contextid', 'context_id', 'context_Id', 'ContextId']:
+            if key in data and 'contextId' not in data:
+                data['contextId'] = data.pop(key)
+        
+        # Chamar o init original
+        super().__init__(**data)
 
 
 # ========== TIPO DINÂMICO DE MESSAGE ==========

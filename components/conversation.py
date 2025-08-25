@@ -31,22 +31,22 @@ def on_blur(e: me.InputBlurEvent):
     state.message_content = e.value
 
 
-async def send_message(message: str, messageid: str = ''):
+async def send_message(message: str, message_id: str = ''):
     state = me.state(PageState)
     app_state = me.state(AppState)
     c = next(
         (
             x
             for x in await ListConversations()
-            if x.conversationid == state.conversationid
+            if x.conversationId == state.conversationid
         ),
         None,
     )
     if not c:
         print('Conversation id ', state.conversationid, ' not found')
     request = Message(
-        messageid=messageid,
-        contextid=state.conversationid,
+        messageId=message_id,
+        contextId=state.conversationid,
         role=Role.user,
         parts=[Part(root=TextPart(text=message))],
     )
@@ -57,13 +57,13 @@ async def send_message(message: str, messageid: str = ''):
     app_state.messages.append(state_message)
     conversation = next(
         filter(
-            lambda x: c and x.conversationid == c.conversationid,
+            lambda x: c and x.conversationId == c.conversationId,
             app_state.conversations,
         ),
         None,
     )
     if conversation:
-        conversation.messageids.append(state_message.messageid)
+        conversation.messageIds.append(state_message.messageId)  # Usar campos reais, não propriedades
     await SendMessage(request)
 
 
@@ -154,14 +154,14 @@ def conversation():
             elif form_sent(message, app_state):
                 chat_bubble(
                     StateMessage(
-                        messageid=message.messageid,
+                        messageId=message.messageId,
                         role=message.role,
                         content=[('Form submitted', 'text/plain')],
                     ),
-                    message.messageid,
+                    message.messageId,
                 )
             else:
-                chat_bubble(message, message.messageid)
+                chat_bubble(message, message.messageId)
 
         with me.box(
             style=me.Style(

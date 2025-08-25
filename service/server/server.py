@@ -112,8 +112,8 @@ class ConversationServer:
         t.start()
         return SendMessageResponse(
             result=MessageInfo(
-                messageid=message.messageid,
-                contextid=message.context_id if message.context_id else '',
+                messageid=message.messageId,
+                contextid=message.contextId if message.contextId else '',
             )
         )
 
