@@ -1,0 +1,276 @@
+/* Estilos responsivos para o Chat UI */
+
+/* Reset e base */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Mobile styles (até 768px) */
+@media (max-width: 768px) {
+    /* Chat bubbles mobile */
+    .chat-bubble {
+        max-width: 90% !important;
+        font-size: 14px !important;
+    }
+    
+    .chat-container {
+        padding: 8px !important;
+    }
+    
+    /* Input mobile */
+    .message-input {
+        font-size: 16px !important; /* Previne zoom no iOS */
+        min-height: 40px !important;
+    }
+    
+    /* Sidebar mobile (drawer) */
+    .mobile-drawer {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 999;
+        background: white;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mobile-drawer.open {
+        transform: translateX(0);
+    }
+    
+    /* Overlay mobile */
+    .mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+    
+    .mobile-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Header mobile */
+    .mobile-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        height: 56px;
+        background: white;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+    }
+    
+    /* Ajustes de espaçamento mobile */
+    .content-padding-mobile {
+        padding: 8px !important;
+    }
+    
+    /* Imagens responsivas mobile */
+    .responsive-image {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Botões touch-friendly */
+    .touch-button {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+}
+
+/* Tablet styles (769px até 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Chat bubbles tablet */
+    .chat-bubble {
+        max-width: 80% !important;
+        font-size: 16px !important;
+    }
+    
+    .chat-container {
+        padding: 12px !important;
+    }
+    
+    /* Sidebar tablet */
+    .sidebar-tablet {
+        width: 60px !important;
+    }
+    
+    /* Input tablet */
+    .message-input {
+        font-size: 16px !important;
+        min-height: 48px !important;
+    }
+    
+    /* Ajustes de espaçamento tablet */
+    .content-padding-tablet {
+        padding: 12px !important;
+    }
+}
+
+/* Desktop styles (acima de 1024px) */
+@media (min-width: 1025px) {
+    /* Chat bubbles desktop */
+    .chat-bubble {
+        max-width: 600px !important;
+        font-size: 16px !important;
+    }
+    
+    .chat-container {
+        padding: 16px !important;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* Sidebar desktop */
+    .sidebar-desktop {
+        width: 200px;
+        transition: width 0.3s ease;
+    }
+    
+    .sidebar-desktop.collapsed {
+        width: 68px;
+    }
+    
+    /* Input desktop */
+    .message-input {
+        font-size: 16px !important;
+        min-height: 56px !important;
+        max-width: 800px;
+    }
+    
+    /* Ajustes de espaçamento desktop */
+    .content-padding-desktop {
+        padding: 24px !important;
+    }
+}
+
+/* Animações e transições */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estados de hover (apenas desktop) */
+@media (hover: hover) {
+    .hover-effect:hover {
+        background-color: #f5f5f5;
+        transition: background-color 0.2s ease;
+    }
+    
+    .button-hover:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s ease;
+    }
+}
+
+/* Acessibilidade */
+.focus-visible:focus {
+    outline: 2px solid #d8407f;
+    outline-offset: 2px;
+}
+
+/* Modo escuro (preparação futura) */
+@media (prefers-color-scheme: dark) {
+    /* Estilos para modo escuro podem ser adicionados aqui */
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .chat-bubble {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+
+/* Utilitários responsivos */
+.mobile-only {
+    display: none !important;
+}
+
+.tablet-only {
+    display: none !important;
+}
+
+.desktop-only {
+    display: block !important;
+}
+
+@media (max-width: 768px) {
+    .mobile-only {
+        display: block !important;
+    }
+    .tablet-only,
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .tablet-only {
+        display: block !important;
+    }
+    .mobile-only,
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+/* Melhorias de performance */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+}

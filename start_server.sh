@@ -24,8 +24,12 @@ if [ ! -d ".venv" ]; then
 fi
 
 echo "✅ Ambiente virtual encontrado"
+
+# Obter o IP da máquina
+SERVER_IP=$(hostname -I | awk '{print $1}')
 echo "🌐 Iniciando servidor na porta 8888..."
-echo "🔗 URL: http://localhost:8888"
+echo "🔗 URL Local: http://localhost:8888"
+echo "🔗 URL IP: http://${SERVER_IP}:8888"
 echo ""
 
 # Executar o servidor com as configurações corretas
