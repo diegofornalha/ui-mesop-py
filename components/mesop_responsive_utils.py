@@ -141,7 +141,7 @@ RESPONSIVE_HEADER_STYLE = me.Style(
 RESPONSIVE_MAIN_CONTENT_STYLE = me.Style(
     flex_grow=1,
     width="min(1200px, 100%)",
-    margin="0 auto",
+    margin=me.Margin.symmetric(horizontal="auto"),
     padding=me.Padding.symmetric(horizontal=16, vertical=24),
 )
 
@@ -167,7 +167,7 @@ RESPONSIVE_INPUT_WRAPPER_STYLE = me.Style(
     border="1px solid #e0e0e0",
     display="flex",
     width="min(800px, 100%)",
-    margin="0 auto",
+    margin=me.Margin.symmetric(horizontal="auto"),
     align_items="center",
     gap=8,
 )
