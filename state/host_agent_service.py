@@ -6,7 +6,7 @@ import uuid
 
 from typing import Any
 
-from a2a.types import FileWithBytes, Message, Part, Role, Task, TaskState
+from a2a.types import FileWithBytes, Message, Part, Task, TaskState
 from service.client.client import ConversationClient
 from service.types import (
     Conversation,
