@@ -1,8 +1,8 @@
-# API Reference
+# Referência da API
 
-## 📚 Complete API Documentation
+## 📚 Documentação Completa da API
 
-### Core Types
+### Tipos Principais
 
 #### Message
 ```python
@@ -38,7 +38,7 @@ class Task(BaseModel):
     status: str = "pending"
 ```
 
-### State Management
+### Gerenciamento de Estado
 
 #### AppState
 ```python
@@ -59,165 +59,165 @@ class AppState:
     api_key_dialog_open: bool = False
 ```
 
-### Service APIs
+### APIs de Serviços
 
 #### ConversationClient
 
-##### Create Conversation
+##### Criar Conversa
 ```python
 async def CreateConversation() -> Conversation:
-    """Create a new conversation"""
-    # Returns: Conversation object with new ID
+    """Criar uma nova conversa"""
+    # Retorna: Objeto Conversation com novo ID
 ```
 
-##### List Conversations
+##### Listar Conversas
 ```python
 async def ListConversations() -> List[Conversation]:
-    """List all active conversations"""
-    # Returns: List of Conversation objects
+    """Listar todas as conversas ativas"""
+    # Retorna: Lista de objetos Conversation
 ```
 
-##### Send Message
+##### Enviar Mensagem
 ```python
 async def SendMessage(message: Message) -> Message:
-    """Send a message to the agent"""
-    # Parameters:
-    #   message: Message object to send
-    # Returns: Message object with server response
+    """Enviar uma mensagem para o agente"""
+    # Parâmetros:
+    #   message: Objeto Message para enviar
+    # Retorna: Objeto Message com resposta do servidor
 ```
 
-##### List Messages
+##### Listar Mensagens
 ```python
 async def ListMessages(conversation_id: str) -> List[Message]:
-    """List all messages in a conversation"""
-    # Parameters:
-    #   conversation_id: ID of the conversation
-    # Returns: List of Message objects
+    """Listar todas as mensagens em uma conversa"""
+    # Parâmetros:
+    #   conversation_id: ID da conversa
+    # Retorna: Lista de objetos Message
 ```
 
-### Component APIs
+### APIs de Componentes
 
 #### Chat Bubble
 ```python
 @me.component
 def chat_bubble(message: StateMessage, key: str):
-    """Render a chat message bubble"""
-    # Parameters:
-    #   message: StateMessage to display
-    #   key: Unique key for the component
+    """Renderizar uma bolha de mensagem de chat"""
+    # Parâmetros:
+    #   message: StateMessage para exibir
+    #   key: Chave única para o componente
 ```
 
-#### Conversation Component
+#### Componente de Conversa
 ```python
 @me.component
 def conversation():
-    """Main conversation interface component"""
-    # Handles:
-    #   - Message display
-    #   - Message input
-    #   - Real-time polling
+    """Componente principal da interface de conversa"""
+    # Gerencia:
+    #   - Exibição de mensagens
+    #   - Entrada de mensagens
+    #   - Polling em tempo real
 ```
 
-#### Form Renderer
+#### Renderizador de Formulários
 ```python
 def render_form(message: StateMessage, app_state: AppState):
-    """Render a form using native Mesop components"""
-    # Parameters:
-    #   message: StateMessage containing form data
-    #   app_state: Current application state
+    """Renderizar um formulário usando componentes nativos do Mesop"""
+    # Parâmetros:
+    #   message: StateMessage contendo dados do formulário
+    #   app_state: Estado atual da aplicação
 ```
 
-### Event Handlers
+### Manipuladores de Eventos
 
-#### Message Events
+#### Eventos de Mensagem
 ```python
 async def send_message(message: str, message_id: str = ''):
-    """Send a message to the agent"""
-    # Parameters:
-    #   message: Text content to send
-    #   message_id: Optional message ID
+    """Enviar uma mensagem para o agente"""
+    # Parâmetros:
+    #   message: Conteúdo de texto para enviar
+    #   message_id: ID da mensagem opcional
 
 async def send_message_enter(e: me.InputEnterEvent):
-    """Handle Enter key press in message input"""
+    """Manipular pressionamento da tecla Enter na entrada de mensagem"""
 
 async def send_message_button(e: me.ClickEvent):
-    """Handle Send button click"""
+    """Manipular clique no botão Enviar"""
 ```
 
-#### Navigation Events
+#### Eventos de Navegação
 ```python
 def toggle_sidenav(e: me.ClickEvent):
-    """Toggle the side navigation panel"""
+    """Alternar o painel de navegação lateral"""
 
 def navigate_to_conversation(conversation_id: str):
-    """Navigate to a specific conversation"""
+    """Navegar para uma conversa específica"""
 ```
 
-### JSON-RPC Endpoints
+### Endpoints JSON-RPC
 
-#### Message Operations
+#### Operações de Mensagem
 ```
 POST /message/send
 POST /message/list
 POST /message/pending
 ```
 
-#### Conversation Operations
+#### Operações de Conversa
 ```
 POST /conversation/create
 POST /conversation/list
 ```
 
-#### Task Operations
+#### Operações de Tarefa
 ```
 POST /task/list
 ```
 
-#### Agent Operations
+#### Operações de Agente
 ```
 POST /agent/register
 POST /agent/list
 ```
 
-#### Event Operations
+#### Operações de Evento
 ```
 POST /events/get
 ```
 
-### Response Formats
+### Formatos de Resposta
 
-#### Success Response
+#### Resposta de Sucesso
 ```json
 {
     "jsonrpc": "2.0",
     "id": "unique-id",
     "result": {
-        // Response data
+        // Dados da resposta
     }
 }
 ```
 
-#### Error Response
+#### Resposta de Erro
 ```json
 {
     "jsonrpc": "2.0",
     "id": "unique-id",
     "error": {
         "code": -32000,
-        "message": "Error description",
+        "message": "Descrição do erro",
         "data": {}
     }
 }
 ```
 
-### WebSocket Events (Future)
+### Eventos WebSocket (Futuro)
 
-#### Connection
+#### Conexão
 ```javascript
 ws://localhost:8888/ws
 ```
 
-#### Message Format
+#### Formato de Mensagem
 ```json
 {
     "type": "message|typing|status",
@@ -225,35 +225,35 @@ ws://localhost:8888/ws
 }
 ```
 
-### Environment Variables
+### Variáveis de Ambiente
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GOOGLE_API_KEY` | Google AI API key | Required |
-| `A2A_UI_PORT` | UI server port | 8888 |
-| `MESOP_DEFAULT_PORT` | Mesop framework port | 8888 |
-| `USE_VERTEX_AI` | Use Vertex AI instead | false |
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `GOOGLE_API_KEY` | Chave da API do Google AI | Obrigatória |
+| `A2A_UI_PORT` | Porta do servidor UI | 8888 |
+| `MESOP_DEFAULT_PORT` | Porta padrão do framework Mesop | 8888 |
+| `USE_VERTEX_AI` | Usar Vertex AI em vez de | false |
 
-### Error Codes
+### Códigos de Erro
 
-| Code | Description |
-|------|-------------|
-| -32700 | Parse error |
-| -32600 | Invalid request |
-| -32601 | Method not found |
-| -32602 | Invalid params |
-| -32603 | Internal error |
-| -32000 | Server error |
+| Código | Descrição |
+|--------|-----------|
+| -32700 | Erro de parse |
+| -32600 | Requisição inválida |
+| -32601 | Método não encontrado |
+| -32602 | Parâmetros inválidos |
+| -32603 | Erro interno |
+| -32000 | Erro do servidor |
 
-### Rate Limits
+### Limites de Taxa
 
-- Messages: 100/minute per conversation
-- Conversations: 10/minute per session
-- File uploads: 10MB max size
+- Mensagens: 100/minuto por conversa
+- Conversas: 10/minuto por sessão
+- Uploads de arquivo: 10MB tamanho máximo
 
-### Authentication
+### Autenticação
 
-Currently using API key authentication via environment variables. Future versions will support:
+Atualmente usando autenticação por chave de API via variáveis de ambiente. Versões futuras suportarão:
 - OAuth 2.0
-- JWT tokens
-- Session-based auth
+- Tokens JWT
+- Autenticação baseada em sessão

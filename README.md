@@ -1,30 +1,30 @@
 # UI Mesop Python
 
-A modern Python web application using Mesop UI framework with Google Gemini AI integration.
+Um aplicativo web moderno em Python usando o framework Mesop UI com integração ao Google Gemini AI.
 
-## Quick Start
+## Início Rápido
 
 ```bash
-# Install dependencies
+# Instalar dependências
 pip install -r requirements.txt
 
-# Set API key
-export GOOGLE_API_KEY="your-key-here"
+# Configurar chave da API
+export GOOGLE_API_KEY="sua-chave-aqui"
 
-# Run application
+# Executar aplicação
 A2A_UI_PORT=8888 MESOP_DEFAULT_PORT=8888 python main.py
 ```
 
-## Documentation
+## Documentação
 
-See the `/docs` folder for detailed documentation:
-- [Architecture](docs/ARCHITECTURE.md)
-- [API Reference](docs/API_REFERENCE.md)  
-- [Implementation Guide](docs/IMPLEMENTATION.md)
+Veja a pasta `/docs` para documentação detalhada:
+- [Arquitetura](docs/ARCHITECTURE.md)
+- [Referência da API](docs/API_REFERENCE.md)  
+- [Guia de Implementação](docs/IMPLEMENTATION.md)
 
-## Recent Improvements
+## Melhorias Recentes
 
-- **38% code reduction** (2,327+ lines removed)
-- **90% simpler form rendering** (376 → 36 lines)
-- **100% type consistency** (single source of truth)
-- **15% faster build time**
+- **38% de redução de código** (2.327+ linhas removidas)
+- **90% mais simples na renderização de formulários** (376 → 36 linhas)
+- **100% de consistência de tipos** (fonte única de verdade)
+- **15% mais rápido no tempo de build**
