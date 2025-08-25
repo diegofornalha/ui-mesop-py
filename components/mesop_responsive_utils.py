@@ -157,7 +157,7 @@ RESPONSIVE_CHAT_INPUT_STYLE = me.Style(
 RESPONSIVE_CHAT_BUBBLE_CONTAINER = me.Style(
     display="flex",
     width="100%",
-    margin=me.Margin.all(vertical=8),
+    margin=me.Margin(top=8, bottom=8),
 )
 
 RESPONSIVE_INPUT_WRAPPER_STYLE = me.Style(
