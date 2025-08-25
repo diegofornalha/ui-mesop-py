@@ -5,6 +5,7 @@ import uuid
 from typing import Any, Literal
 
 import mesop as me
+from styles.colors import SURFACE, ERROR
 
 from a2a.types import DataPart, Message, Part, Role, TextPart
 from state.host_agent_service import SendMessage
@@ -115,7 +116,7 @@ def render_form_card(message: StateMessage, data: dict[str, Any] | None):
         style=me.Style(
             padding=me.Padding.all(BOX_PADDING),
             max_width='75vw',
-            background=me.theme_var('surface'),
+            background=SURFACE,  # Superfície quase branca
             border_radius=15,
             margin=me.Margin(top=5, bottom=20, left=5, right=5),
             justify_content=(
@@ -199,7 +200,7 @@ def render_structure(
         style=me.Style(
             padding=me.Padding.all(BOX_PADDING),
             max_width='75vw',
-            background=me.theme_var('surface'),
+            background=SURFACE,  # Superfície quase branca
             border_radius=15,
             margin=me.Margin(top=5, bottom=20, left=5, right=5),
             box_shadow=(
@@ -265,7 +266,7 @@ def input_field(
                 form.errors[key],
                 style=me.Style(
                     margin=me.Margin(top=-13, left=15, bottom=15),
-                    color=me.theme_var('error'),
+                    color=ERROR,  # Vermelho para erros
                     font_size=13,
                 ),
             )

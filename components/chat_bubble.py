@@ -1,6 +1,7 @@
 import mesop as me
 
 from state.state import AppState, StateMessage
+from styles.colors import TEXT_PRIMARY, CONTAINER_PRIMARY, CONTAINER_SECONDARY
 
 
 @me.component
@@ -76,7 +77,7 @@ def chat_box(
                         color=(
                             'white'  # Texto branco para mensagens do usuário
                             if role == 'user'
-                            else me.theme_var('on-surface')  # Cor padrão para IA
+                            else TEXT_PRIMARY  # Texto escuro para IA
                         ),
                         border_radius=15,
                     ),
@@ -103,9 +104,9 @@ def chat_box(
                         padding=me.Padding(top=1, left=15, right=15, bottom=1),
                         margin=me.Margin(top=5, left=0, right=0, bottom=5),
                         background=(
-                            me.theme_var('primary-container')
+                            CONTAINER_PRIMARY  # Container azul claro para agente
                             if role == 'agent'
-                            else me.theme_var('secondary-container')
+                            else CONTAINER_SECONDARY  # Container cinza claro para usuário
                         ),
                         border_radius=15,
                     ),

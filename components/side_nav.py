@@ -47,7 +47,7 @@ def sidenav(current_page: str):
             width=SIDENAV_MAX_WIDTH
             if app_state.sidenav_open
             else SIDENAV_MIN_WIDTH,
-            background='#ffe0ec',  # Rosa bem claro para barra lateral
+            background='#f8f9fa',  # Sidebar com leve destaque cinza claro
         ),
     ):
         with me.box(
@@ -83,15 +83,7 @@ def sidenav(current_page: str):
                     page['display'],
                     not app_state.sidenav_open,
                 )
-            # settings & theme toggle
-            with me.box(style=MENU_BOTTOM):
-                theme_toggle_icon(
-                    9,
-                    'light_mode',
-                    'Theme',
-                    not app_state.sidenav_open,
-                )
-                # menu_item(10, "settings", "Settings", not app_state.sidenav_open)
+            # Removido toggle de tema - usando cores fixas
 
 
 def menu_item(
@@ -138,66 +130,7 @@ def menu_item(
                 me.text(text)
 
 
-def toggle_theme(e: me.ClickEvent):  # pylint: disable=unused-argument
-    """Toggle theme event"""
-    s = me.state(AppState)
-    if me.theme_brightness() == 'light':
-        me.set_theme_mode('dark')
-        s.theme_mode = 'dark'
-    else:
-        me.set_theme_mode('light')
-        s.theme_mode = 'light'
-
-
-def theme_toggle_icon(key: int, icon: str, text: str, min: bool = True):
-    """Theme toggle icon"""
-    # THEME_TOGGLE_STYLE = me.Style(position="absolute", bottom=50, align_content="left")
-    if min:  # minimized
-        with me.box(
-            style=me.Style(
-                display='flex',
-                flex_direction='row',
-                gap=5,
-                align_items='center',
-            ),
-        ):
-            with me.content_button(
-                key=str(key),
-                on_click=toggle_theme,
-                # style=THEME_TOGGLE_STYLE,
-                type='icon',
-            ):
-                with me.tooltip(message=text):
-                    me.icon(
-                        'light_mode'
-                        if me.theme_brightness() == 'dark'
-                        else 'dark_mode'
-                    )
-
-    else:  # expanded
-        with me.content_button(
-            key=str(key),
-            on_click=toggle_theme,
-            # style=THEME_TOGGLE_STYLE,
-        ):
-            with me.box(
-                style=me.Style(
-                    display='flex',
-                    flex_direction='row',
-                    gap=5,
-                    align_items='center',
-                ),
-            ):
-                me.icon(
-                    'light_mode'
-                    if me.theme_brightness() == 'dark'
-                    else 'dark_mode'
-                )
-                me.text(
-                    'Light mode'
-                    if me.theme_brightness() == 'dark'
-                    else 'Dark mode'
-                )
+# Funções de toggle de tema removidas - usando cores fixas
 
 
 MENU_BOTTOM = me.Style(

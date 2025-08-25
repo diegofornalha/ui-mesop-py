@@ -1,4 +1,5 @@
 import mesop as me
+from styles.colors import BACKGROUND
 
 
 @me.content_component
@@ -25,7 +26,7 @@ def dialog(is_open: bool):
         ):
             with me.box(
                 style=me.Style(
-                    background=me.theme_var('background'),
+                    background=BACKGROUND,  # Branco limpo
                     border_radius=20,
                     box_sizing='content-box',
                     box_shadow=(

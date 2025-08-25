@@ -153,8 +153,7 @@ class AppState:
     """Mesop Application State"""
 
     sidenav_open: bool = False
-    theme_mode: Literal['system', 'light', 'dark'] = 'system'
-
+    
     current_conversation_id: str = ''
     conversations: list[StateConversation] = dataclasses.field(default_factory=list)
     messages: list[StateMessage] = dataclasses.field(default_factory=list)

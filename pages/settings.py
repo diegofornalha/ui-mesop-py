@@ -6,6 +6,7 @@ from components.header import header
 from components.page_scaffold import page_frame, page_scaffold
 from state.host_agent_service import UpdateApiKey
 from state.state import AppState, SettingsState
+from styles.colors import PRIMARY, SUCCESS, TEXT_ON_PRIMARY
 
 
 def on_selection_change_output_types(e: me.SelectSelectionChangeEvent):
@@ -103,7 +104,7 @@ def settings_page_content():
                                 type='raised',
                                 on_click=update_api_key,
                                 style=me.Style(
-                                    color=me.theme_var('primary'),
+                                    color=PRIMARY,  # Azul corporativo
                                 ),
                             )
 
@@ -111,9 +112,7 @@ def settings_page_content():
                         if update_status.show_success:
                             with me.box(
                                 style=me.Style(
-                                    background=me.theme_var(
-                                        'success-container'
-                                    ),
+                                    background=SUCCESS,  # Verde de sucesso
                                     padding=me.Padding(
                                         top=10, bottom=10, left=10, right=10
                                     ),
@@ -128,18 +127,14 @@ def settings_page_content():
                                 me.icon(
                                     'check_circle',
                                     style=me.Style(
-                                        color=me.theme_var(
-                                            'on-success-container'
-                                        ),
+                                        color=TEXT_ON_PRIMARY,  # Texto branco
                                         margin=me.Margin(right=10),
                                     ),
                                 )
                                 me.text(
                                     'API Key updated successfully',
                                     style=me.Style(
-                                        color=me.theme_var(
-                                            'on-success-container'
-                                        ),
+                                        color=TEXT_ON_PRIMARY,  # Texto branco
                                     ),
                                 )
 

@@ -1,4 +1,5 @@
 import mesop as me
+from styles.colors import BACKGROUND
 
 
 SIDENAV_MIN_WIDTH = 68
@@ -21,14 +22,14 @@ MAIN_COLUMN_STYLE = me.Style(
 )
 
 PAGE_BACKGROUND_STYLE = me.Style(
-    background=me.theme_var('background'),
+    background=BACKGROUND,  # Branco limpo
     height='100%',
     overflow_y='scroll',
     margin=me.Margin(bottom=20),
 )
 
 PAGE_BACKGROUND_PADDING_STYLE = me.Style(
-    background=me.theme_var('background'),
+    background=BACKGROUND,  # Branco limpo
     padding=me.Padding(top=24, left=24, right=24, bottom=24),
     display='flex',
     flex_direction='column',

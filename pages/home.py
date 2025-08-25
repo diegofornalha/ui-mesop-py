@@ -3,6 +3,7 @@ import mesop as me
 from components.conversation_list import conversation_list
 from components.header import header
 from state.state import AppState
+from styles.colors import BACKGROUND
 
 
 @me.stateclass
@@ -47,14 +48,14 @@ def home_page_content(app_state: AppState):
     ):
         with me.box(
             style=me.Style(
-                background=me.theme_var('background'),
+                background=BACKGROUND,  # Branco limpo
                 height='100%',
                 margin=me.Margin(bottom=20),
             )
         ):
             with me.box(
                 style=me.Style(
-                    background=me.theme_var('background'),
+                    background=BACKGROUND,  # Branco limpo
                     padding=me.Padding(top=24, left=24, right=24, bottom=24),
                     display='flex',
                     flex_direction='column',

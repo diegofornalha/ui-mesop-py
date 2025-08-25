@@ -3,6 +3,7 @@ import mesop.labs as mel
 
 from state.host_agent_service import UpdateAppState
 from state.state import AppState
+from styles.colors import BACKGROUND
 from styles.styles import (
     MAIN_COLUMN_STYLE,
     PAGE_BACKGROUND_PADDING_STYLE,
@@ -52,7 +53,7 @@ def page_scaffold():
     ):
         with me.box(
             style=me.Style(
-                background=me.theme_var('background'),
+                background=BACKGROUND,  # Branco limpo
                 height='100%',
                 overflow_y='scroll',
                 margin=me.Margin(bottom=20),
