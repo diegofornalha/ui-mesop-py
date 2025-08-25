@@ -1,19 +1,21 @@
 """
-Tipos corrigidos com nomenclatura consistente.
-Resolve o problema de messageId vs messageid.
+Tipos consolidados - fonte única de verdade.
+Conformidade total com A2A Protocol, Google ADK e Pydantic.
 """
 
-from typing import Annotated, Any, Literal, Optional, Union, List, Tuple
+from typing import Annotated, Any, Literal, Optional, Union, List, Tuple, Dict
 from uuid import uuid4
 from pydantic import BaseModel, Field, TypeAdapter, validator
+import sys
 
-# Importar MessagePatched se disponível
+# Tentar importar Role do a2a se disponível
 try:
-    from message_patch import MessagePatched
-    HAS_MESSAGE_PATCHED = True
+    from a2a.types import Role, Message as A2AMessage
+    HAS_A2A = True
 except ImportError:
-    MessagePatched = None
-    HAS_MESSAGE_PATCHED = False
+    Role = None
+    A2AMessage = None
+    HAS_A2A = False
 
 
 # ========== CLASSES BASE NECESSÁRIAS ==========
@@ -27,55 +29,78 @@ class AgentCard(BaseModel):
 
 
 class Message(BaseModel):
-    """Representa uma mensagem - padrão A2A Protocol"""
-    messageId: str  # Campo principal em camelCase (A2A Protocol)
-    content: str = ""  # Valor padrão vazio
-    author: str = ""  # Valor padrão vazio
-    timestamp: float = 0.0
-    contextId: Optional[str] = Field(default=None, alias="context_id")  # Padrão camelCase com alias Python
+    """
+    Mensagem consolidada - conformidade total com A2A Protocol.
+    Aceita apenas formatos oficiais: camelCase (A2A) e snake_case (Python).
+    """
+    # Configuração Pydantic para aceitar aliases
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        extra = 'allow'
+        validate_assignment = True
+    
+    # Campos principais - camelCase (A2A Protocol) com aliases snake_case
+    messageId: str = Field(default="", alias="message_id")
+    content: str = Field(default="")
+    author: str = Field(default="")
+    timestamp: float = Field(default=0.0)
+    contextId: Optional[str] = Field(default=None, alias="context_id")
+    taskId: Optional[str] = Field(default=None, alias="task_id")
+    conversationId: Optional[str] = Field(default=None, alias="conversation_id")
     parts: List[Any] = Field(default_factory=list)
+    role: Optional[Any] = Field(default="user")
+    metadata: Optional[Dict[str, Any]] = Field(default=None)
     
     def __init__(self, **data):
-        """Override init para normalizar campos"""
-        # Normalizar messageId - aceitar todas as variações
-        for key in ['messageid', 'message_id', 'message_Id', 'MessageId', 'id']:
-            if key in data and 'messageId' not in data:
-                data['messageId'] = data.pop(key)
+        """
+        Inicialização simplificada - aceita APENAS 2-3 formatos por campo.
+        Conformidade com Python 3: "Simple is better than complex"
+        """
+        # messageId: aceitar apenas 2 formatos (camelCase e snake_case)
+        if 'message_id' in data:
+            data['messageId'] = data.pop('message_id')
+        elif 'messageid' in data:  # Compatibilidade mínima
+            data['messageId'] = data.pop('messageid')
         
-        # Se ainda não tiver messageId, criar um
-        if 'messageId' not in data and 'id' not in data:
+        # Gerar messageId se não existir
+        if 'messageId' not in data:
             data['messageId'] = str(uuid4())
         
-        # Normalizar text/content
-        for key in ['text', 'message', 'body']:
-            if key in data and 'content' not in data:
-                data['content'] = data.pop(key)
+        # content: aceitar apenas 'text' como alternativa
+        if 'text' in data and 'content' not in data:
+            data['content'] = data.pop('text')
         
-        # Normalizar author
-        for key in ['user', 'userId', 'user_id', 'sender']:
-            if key in data and 'author' not in data:
-                data['author'] = data.pop(key)
+        # author: aceitar apenas 'user' como alternativa
+        if 'user' in data and 'author' not in data:
+            data['author'] = data.pop('user')
         
-        # contextId é tratado automaticamente pelo alias Pydantic
+        # contextId: já tratado pelo Field alias
+        if 'context_id' in data:
+            data['contextId'] = data.pop('context_id')
         
-        # Chamar o init original
+        # taskId: já tratado pelo Field alias
+        if 'task_id' in data:
+            data['taskId'] = data.pop('task_id')
+        
+        # conversationId: já tratado pelo Field alias
+        if 'conversation_id' in data:
+            data['conversationId'] = data.pop('conversation_id')
+        
+        # Converter role para enum se disponível
+        if 'role' in data and HAS_A2A and Role:
+            role_value = data['role']
+            if isinstance(role_value, str):
+                try:
+                    if role_value.lower() == 'user':
+                        data['role'] = Role.user
+                    elif role_value.lower() == 'agent':
+                        data['role'] = Role.agent
+                except:
+                    pass  # Manter como string se falhar
+        
+        # Chamar init do BaseModel
         super().__init__(**data)
-    
-    # Propriedades Python MUTÁVEIS - retornam referências diretas
-    @property
-    def message_id_python(self) -> str:
-        """Propriedade Python - compatibilidade snake_case"""
-        return self.messageId
-    
-    @property
-    def context_id_python(self) -> str:
-        """Propriedade Python - compatibilidade snake_case"""
-        return self.contextId or ""
-    
-    @property
-    def parts_python(self) -> list:
-        """Propriedade Python MUTÁVEL - retorna referência direta à lista"""
-        return self.parts  # ✅ Retorna referência, permite append/extend
 
 
 class Task(BaseModel):
@@ -117,34 +142,18 @@ class ConversationFixed(BaseModel):
     isActive: bool = Field(alias="isactive")
     name: str = ''
     task_ids: List[str] = Field(default_factory=list)
-    messages: List[Any] = Field(default_factory=list)  # Será List[Message] ou List[MessagePatched]
+    messages: List[Any] = Field(default_factory=list)  # Lista de mensagens
     
     class Config:
         populate_by_name = True
         allow_population_by_field_name = True
-    
-    # Propriedades Python MUTÁVEIS - retornam referências diretas
-    @property
-    def conversation_id_python(self) -> str:
-        """Propriedade Python - compatibilidade snake_case"""
-        return self.conversationId
-    
-    @property
-    def is_active_python(self) -> bool:
-        """Propriedade Python - compatibilidade snake_case"""
-        return self.isActive
-    
-    @property
-    def messages_python(self) -> list:
-        """Propriedade Python MUTÁVEL - retorna referência direta à lista"""
-        return self.messages  # ✅ Retorna referência, permite append/extend
 
 
 class EventFixed(BaseModel):
     """Event com nomenclatura consistente"""
     id: str
     actor: str = ''
-    content: Any  # Será Message ou MessagePatched
+    content: Any  # Conteúdo do evento (Message)
     timestamp: float
     
     def __init__(self, **data):
@@ -181,11 +190,8 @@ class MessageInfoFixed(BaseModel):
 
 # ========== TIPO DINÂMICO DE MESSAGE ==========
 
-# Criar tipo dinâmico para aceitar ambos Message e MessagePatched
-if HAS_MESSAGE_PATCHED and MessagePatched:
-    MessageType = Union[Message, MessagePatched]
-else:
-    MessageType = Message
+# Tipo de mensagem consolidado
+MessageType = Message
 
 # Atualizar campos dinâmicos para usar MessageType
 if 'EventFixed' in locals():
@@ -295,6 +301,33 @@ class AgentClientJSONError(AgentClientError):
     def __init__(self, message: str):
         self.message = message
         super().__init__(f'JSON Error: {message}')
+
+
+# ========== PATCH A2A.TYPES SE DISPONÍVEL ==========
+
+def patch_a2a_message():
+    """
+    Aplica o patch no módulo a2a.types para usar nossa versão consolidada de Message.
+    Garante conformidade total com A2A Protocol.
+    """
+    if HAS_A2A:
+        import a2a.types
+        
+        # Substituir a classe Message no módulo a2a.types
+        a2a.types.Message = Message
+        
+        # Também atualizar no cache de módulos
+        if 'a2a.types' in sys.modules:
+            sys.modules['a2a.types'].Message = Message
+        
+        print("[TYPES] a2a.types.Message patchado - conformidade total com A2A Protocol")
+        return True
+    return False
+
+
+# Aplicar patch automaticamente ao importar este módulo
+if HAS_A2A:
+    patch_a2a_message()
 
 
 # ========== ALIASES PARA COMPATIBILIDADE ==========

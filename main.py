@@ -10,9 +10,6 @@ from contextlib import asynccontextmanager
 import httpx
 import mesop as me
 
-# IMPORTANTE: Aplicar o patch ANTES de qualquer import que use a2a.types
-import message_patch  # noqa: F401
-
 from components.api_key_dialog import api_key_dialog
 from components.page_scaffold import page_scaffold
 from dotenv import load_dotenv
