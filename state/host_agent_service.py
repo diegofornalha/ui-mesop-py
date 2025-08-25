@@ -265,21 +265,39 @@ def convert_task_to_state(task: Task) -> StateTask:
 
 
 def convert_event_to_state(event: Event) -> StateEvent:
-    # Verificar se role existe e é enum ou string
-    if hasattr(event.content, 'role'):
-        if hasattr(event.content.role, 'name'):
-            role_value = event.content.role.name
+    # Verificar se event.content é dict ou objeto
+    if isinstance(event.content, dict):
+        # Se content é dict
+        content_dict = event.content
+        role_value = content_dict.get('role', 'agent')
+        if hasattr(role_value, 'name'):  # Se role é enum
+            role_value = role_value.name
         else:
-            role_value = str(event.content.role)
+            role_value = str(role_value)
+        
+        # Extrair parts do dict
+        parts = content_dict.get('parts', [])
+        context_id = content_dict.get('contextId', content_dict.get('context_id', ''))
     else:
-        role_value = 'agent'  # Valor padrão para eventos
+        # Se content é objeto
+        if hasattr(event.content, 'role'):
+            if hasattr(event.content.role, 'name'):
+                role_value = event.content.role.name
+            else:
+                role_value = str(event.content.role)
+        else:
+            role_value = 'agent'  # Valor padrão para eventos
+        
+        # Extrair parts do objeto
+        parts = getattr(event.content, 'parts', [])
+        context_id = extract_message_conversation(event.content)
     
     return StateEvent(
-        contextId=extract_message_conversation(event.content),
-        actor=event.actor,
+        contextId=context_id,
+        actor=getattr(event, 'actor', ''),
         role=role_value,
-        id=event.id,
-        content=extract_content(event.content.parts),
+        id=getattr(event, 'id', ''),
+        content=extract_content(parts),
     )
 
 
