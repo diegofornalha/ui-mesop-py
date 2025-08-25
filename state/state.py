@@ -1,6 +1,6 @@
 import dataclasses
 
-from typing import Any, Literal
+from typing import Any
 
 import mesop as me
 
