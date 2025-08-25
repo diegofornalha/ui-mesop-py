@@ -47,7 +47,7 @@ def sidenav(current_page: str):
             width=SIDENAV_MAX_WIDTH
             if app_state.sidenav_open
             else SIDENAV_MIN_WIDTH,
-            background=me.theme_var('secondary-container'),
+            background='#ffe0ec',  # Rosa bem claro para barra lateral
         ),
     ):
         with me.box(

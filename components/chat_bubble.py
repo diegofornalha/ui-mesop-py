@@ -61,6 +61,7 @@ def chat_box(
                     content,
                     style=me.Style(
                         font_family='Google Sans',
+                        font_weight='bold',  # Texto em negrito para todas as mensagens
                         box_shadow=(
                             '0 1px 2px 0 rgba(60, 64, 67, 0.3), '
                             '0 1px 3px 1px rgba(60, 64, 67, 0.15)'
@@ -68,9 +69,14 @@ def chat_box(
                         padding=me.Padding(top=1, left=15, right=15, bottom=1),
                         margin=me.Margin(top=5, left=0, right=0, bottom=5),
                         background=(
-                            me.theme_var('primary-container')
+                            '#d8407f'  # Rosa escuro para mensagens do usuário
                             if role == 'user'
-                            else me.theme_var('secondary-container')
+                            else '#ffe0ec'  # Rosa bem claro para mensagens da IA
+                        ),
+                        color=(
+                            'white'  # Texto branco para mensagens do usuário
+                            if role == 'user'
+                            else me.theme_var('on-surface')  # Cor padrão para IA
                         ),
                         border_radius=15,
                     ),

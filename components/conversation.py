@@ -182,5 +182,11 @@ def conversation():
             with me.content_button(
                 type='flat',
                 on_click=send_message_button,
+                style=me.Style(
+                    background='#d8407f',  # Rosa escuro como as mensagens do usuário
+                    color='white',  # Ícone branco
+                    border_radius=20,  # Botão arredondado
+                    padding=me.Padding.all(8),
+                ),
             ):
-                me.icon(icon='send')
+                me.icon(icon='send', style=me.Style(color='white'))
