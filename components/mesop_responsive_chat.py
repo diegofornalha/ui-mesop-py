@@ -40,7 +40,7 @@ def mesop_chat_bubble(message: StateMessage, is_user: bool = False):
             font_size=responsive_text_size()["medium"],
             font_weight="500",
             box_shadow="0 1px 2px rgba(0, 0, 0, 0.1)",
-            word_wrap="break-word",
+
         )
         
         with me.box(style=bubble_style):
@@ -108,7 +108,7 @@ def mesop_chat_input(
                     justify_content="center",
                 ),
             ):
-                me.icon(icon="send", style=me.Style(color="white", size=24))
+                me.icon(icon="send", style=me.Style(color="white", font_size=24))
 
 
 @me.component
@@ -163,7 +163,7 @@ def mesop_responsive_sidebar():
         height="100vh",
         width="min(280px, 80vw)",  # Máximo 280px ou 80% da viewport
         background="white",
-        border_right="1px solid #e0e0e0",
+        border="0 1px 0 0 solid #e0e0e0",
         overflow_y="auto",
         z_index=1000,
         transform="translateX(-100%)" if not app_state.sidenav_open else "translateX(0)",
@@ -250,7 +250,7 @@ def render_conversations_list():
                     cursor="pointer",
                     margin_bottom=8,
                     background="#f5f5f5" if conv.conversationId == app_state.current_conversation_id else "transparent",
-                    hover_background="#f0f0f0",
+
                 ),
                 on_click=lambda e, cid=conv.conversationId: me.navigate(f"/conversation?conversationid={cid}"),
             ):

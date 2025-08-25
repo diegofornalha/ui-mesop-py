@@ -56,7 +56,7 @@ def responsive_sidenav(
         height="100vh",
         width=sidebar_width,
         background="white",
-        border_right="1px solid #e0e0e0",
+        border="0 1px 0 0 solid #e0e0e0",
         display="flex",
         flex_direction="column",
         transition="left 0.3s ease, width 0.3s ease",
@@ -189,7 +189,7 @@ def render_conversation_item(conversation, current_id: str, is_open: bool, on_cl
             border_left=f"3px solid #d8407f" if is_active else "3px solid transparent",
             cursor="pointer",
             transition="all 0.2s ease",
-            hover_background="#f0f0f0",
+
             display="flex",
             align_items="center",
             gap=12,

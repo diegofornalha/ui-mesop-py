@@ -65,7 +65,7 @@ def render_responsive_header():
             with me.box(
                 style=me.Style(
                     display="block",
-                    media_query="@media (min-width: 768px) { display: none; }",
+
                 )
             ):
                 with me.content_button(
@@ -102,11 +102,11 @@ def render_desktop_sidebar():
             bottom=0,
             width=sidebar_width,
             background="white",
-            border_right="1px solid #e0e0e0",
+            border="0 1px 0 0 solid #e0e0e0",
             overflow_y="auto",
             transition="width 0.3s ease",
             display="none",  # Oculta por padrão
-            media_query="@media (min-width: 768px) { display: block; }",
+
         )
     ):
         render_sidebar_content()
@@ -266,7 +266,7 @@ def mesop_responsive_card(title: str, content: str):
             box_shadow="0 2px 4px rgba(0, 0, 0, 0.1)",
             transition="box-shadow 0.2s ease",
             cursor="pointer",
-            hover_box_shadow="0 4px 8px rgba(0, 0, 0, 0.15)",
+
         )
     ):
         me.text(

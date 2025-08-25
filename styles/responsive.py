@@ -179,8 +179,7 @@ def get_chat_bubble_style(role: str, is_mobile: bool = False) -> me.Style:
         color=color,
         border_radius=15,
         max_width=config.chat_bubble_max_width,
-        word_wrap="break-word",
-        overflow_wrap="break-word",
+
     )
 
 

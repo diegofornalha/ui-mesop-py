@@ -252,7 +252,7 @@ def render_input_area(page_state: ResponsivePageState, is_mobile: bool):
                 justify_content="center",
                 cursor="pointer",
                 transition="all 0.2s ease",
-                hover_background="#c2366d",  # Tom mais escuro no hover
+
             ),
         ):
             me.icon(
