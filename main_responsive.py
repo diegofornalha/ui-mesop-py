@@ -51,7 +51,7 @@ def on_load(e: me.LoadEvent):
         state.api_key_dialog_open = True
 
 
-# Security policy with CSS for responsive styles
+# Security policy for responsive styles
 security_policy = me.SecurityPolicy(
     allowed_script_srcs=[
         'https://cdn.jsdelivr.net',
@@ -70,10 +70,6 @@ security_policy = me.SecurityPolicy(
         'https://*.googleapis.com',
     ],
     allowed_iframe_parents=['*'],
-    allowed_style_srcs=[
-        "'self'",
-        "'unsafe-inline'",  # Para estilos inline responsivos
-    ],
 )
 
 
