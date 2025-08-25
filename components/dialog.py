@@ -32,7 +32,7 @@ def dialog(is_open: bool):
                     box_shadow=(
                         '0 3px 1px -2px #0003, 0 2px 2px #00000024, 0 1px 5px #0000001f'
                     ),
-                    margin=me.Margin.symmetric(vertical=0, horizontal=0),
+                    margin=me.Margin.all(0),
                     padding=me.Padding.all(20),
                 )
             ):

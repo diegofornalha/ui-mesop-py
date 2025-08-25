@@ -11,16 +11,9 @@ from components.viewport_detector import (
 )
 from styles.responsive import get_responsive_config
 
-# Security policy para permitir estilos inline
-security_policy = me.SecurityPolicy(
-    allowed_style_srcs=["'self'", "'unsafe-inline'"],
-)
-
-
 @me.page(
     path="/test",
     title="Teste de Responsividade",
-    security_policy=security_policy,
     stylesheets=["/static/responsive.css"],
 )
 def test_responsive_page():
@@ -33,7 +26,7 @@ def test_responsive_page():
         style=me.Style(
             padding=me.Padding.all(24),
             max_width=1200,
-            margin=me.Margin(left="auto", right="auto"),
+            margin=me.Margin.all(0),
         )
     ):
         # Título responsivo
@@ -71,7 +64,7 @@ def render_device_info():
             margin_bottom=24,
         )
     ):
-        me.text("Informações do Dispositivo", style=me.Style(font_weight="bold", margin_bottom=8))
+        me.text("Informações do Dispositivo", style=me.Style(font_weight="bold", margin=me.Margin(bottom=8)))
         
         # Mobile
         with show_on_device(["mobile"]):
@@ -94,10 +87,10 @@ def render_device_info():
 
 def render_visibility_demo():
     """Demonstra componentes com visibilidade condicional"""
-    with me.box(style=me.Style(margin_bottom=24)):
+    with me.box(style=me.Style(margin=me.Margin(bottom=24))):
         me.text(
             "Visibilidade Condicional",
-            style=me.Style(font_size=20, font_weight="bold", margin_bottom=16)
+            style=me.Style(font_size=20, font_weight="bold", margin=me.Margin(bottom=16))
         )
         
         # Visível apenas em mobile
@@ -144,7 +137,7 @@ def render_grid_demo():
     """Demonstra grid responsivo"""
     me.text(
         "Grid Responsivo",
-        style=me.Style(font_size=20, font_weight="bold", margin_bottom=16)
+        style=me.Style(font_size=20, font_weight="bold", margin=me.Margin(bottom=16))
     )
     
     with responsive_grid(
@@ -174,7 +167,7 @@ def render_container_demo():
     """Demonstra container responsivo"""
     me.text(
         "Container Responsivo",
-        style=me.Style(font_size=20, font_weight="bold", margin_bottom=16, margin_top=24)
+        style=me.Style(font_size=20, font_weight="bold", margin=me.Margin(bottom=16, top=24))
     )
     
     with responsive_container(

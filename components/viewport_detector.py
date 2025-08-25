@@ -156,7 +156,21 @@ def responsive_text(
         font_size = desktop_size
     
     # Criar estilo com tamanho responsivo
-    style = me.Style(font_size=font_size, **kwargs)
+    # Processar kwargs para converter margin_bottom em margin
+    processed_kwargs = {}
+    for key, value in kwargs.items():
+        if key == 'margin_bottom':
+            processed_kwargs['margin'] = me.Margin(bottom=value)
+        elif key == 'margin_top':
+            processed_kwargs['margin'] = me.Margin(top=value)
+        elif key == 'margin_left':
+            processed_kwargs['margin'] = me.Margin(left=value)
+        elif key == 'margin_right':
+            processed_kwargs['margin'] = me.Margin(right=value)
+        else:
+            processed_kwargs[key] = value
+    
+    style = me.Style(font_size=font_size, **processed_kwargs)
     
     me.text(text, style=style)
 
