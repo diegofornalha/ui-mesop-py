@@ -9,30 +9,30 @@ from state.agent_state import AgentState
 def agents_list(
     agents: list[AgentCard],
 ):
-    """Agents list component."""
+    """Componente da lista de agentes."""
     df_data: dict[str, list[str | bool | None]] = {
-        'Address': [],
-        'Name': [],
-        'Description': [],
-        'Organization': [],
-        'Input Modes': [],
-        'Output Modes': [],
-        'Extensions': [],
+        'Endereço': [],
+        'Nome': [],
+        'Descrição': [],
+        'Organização': [],
+        'Modos de Entrada': [],
+        'Modos de Saída': [],
+        'Extensões': [],
         'Streaming': [],
     }
     for agent_info in agents:
-        df_data['Address'].append(agent_info.url)
-        df_data['Name'].append(agent_info.name)
-        df_data['Description'].append(agent_info.description)
-        df_data['Organization'].append(
+        df_data['Endereço'].append(agent_info.url)
+        df_data['Nome'].append(agent_info.name)
+        df_data['Descrição'].append(agent_info.description)
+        df_data['Organização'].append(
             agent_info.provider.organization if agent_info.provider else ''
         )
-        df_data['Input Modes'].append(', '.join(agent_info.default_input_modes))
-        df_data['Output Modes'].append(
+        df_data['Modos de Entrada'].append(', '.join(agent_info.default_input_modes))
+        df_data['Modos de Saída'].append(
             ', '.join(agent_info.default_output_modes)
         )
         df_data['Streaming'].append(agent_info.capabilities.streaming)
-        df_data['Extensions'].append(
+        df_data['Extensões'].append(
             ', '.join([ext.uri for ext in agent_info.capabilities.extensions])
             if agent_info.capabilities.extensions
             else ''
@@ -40,13 +40,13 @@ def agents_list(
     df = pd.DataFrame(
         pd.DataFrame(df_data),
         columns=[
-            'Address',
-            'Name',
-            'Description',
-            'Organization',
-            'Input Modes',
-            'Output Modes',
-            'Extensions',
+            'Endereço',
+            'Nome',
+            'Descrição',
+            'Organização',
+            'Modos de Entrada',
+            'Modos de Saída',
+            'Extensões',
             'Streaming',
         ],
     )
@@ -61,9 +61,9 @@ def agents_list(
             df,
             header=me.TableHeader(sticky=True),
             columns={
-                'Address': me.TableColumn(sticky=True),
-                'Name': me.TableColumn(sticky=True),
-                'Description': me.TableColumn(sticky=True),
+                'Endereço': me.TableColumn(sticky=True),
+                'Nome': me.TableColumn(sticky=True),
+                'Descrição': me.TableColumn(sticky=True),
             },
         )
         with me.content_button(
@@ -82,6 +82,6 @@ def agents_list(
 
 
 def add_agent(e: me.ClickEvent):  # pylint: disable=unused-argument
-    """Import agent button handler."""
+    """Manipulador do botão importar agente."""
     state = me.state(AgentState)
     state.agent_dialog_open = True

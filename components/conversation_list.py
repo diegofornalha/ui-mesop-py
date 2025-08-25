@@ -7,20 +7,20 @@ from state.state import AppState, StateConversation
 
 @me.component
 def conversation_list(conversations: list[StateConversation]):
-    """Conversation list component"""
+    """Componente da lista de conversas"""
     df_data: dict[str, list[str | int]] = {
         'ID': [],
-        'Name': [],
+        'Nome': [],
         'Status': [],
-        'Messages': [],
+        'Mensagens': [],
     }
     for conversation in conversations:
         df_data['ID'].append(conversation.conversationId)
-        df_data['Name'].append(conversation.conversationName)
-        df_data['Status'].append('Open' if conversation.isActive else 'Closed')
-        df_data['Messages'].append(len(conversation.messageIds))
+        df_data['Nome'].append(conversation.conversationName)
+        df_data['Status'].append('Aberta' if conversation.isActive else 'Fechada')
+        df_data['Mensagens'].append(len(conversation.messageIds))
     df = pd.DataFrame(
-        pd.DataFrame(df_data), columns=['ID', 'Name', 'Status', 'Messages']
+        pd.DataFrame(df_data), columns=['ID', 'Nome', 'Status', 'Mensagens']
     )
     with me.box(
         style=me.Style(
@@ -35,9 +35,9 @@ def conversation_list(conversations: list[StateConversation]):
             header=me.TableHeader(sticky=True),
             columns={
                 'ID': me.TableColumn(sticky=True),
-                'Name': me.TableColumn(sticky=True),
+                'Nome': me.TableColumn(sticky=True),
                 'Status': me.TableColumn(sticky=True),
-                'Messages': me.TableColumn(sticky=True),
+                'Mensagens': me.TableColumn(sticky=True),
             },
         )
         with me.content_button(
@@ -56,7 +56,7 @@ def conversation_list(conversations: list[StateConversation]):
 
 
 async def add_conversation(e: me.ClickEvent):  # pylint: disable=unused-argument
-    """Add conversation button handler"""
+    """Manipulador do botão adicionar conversa"""
     response = await CreateConversation()
     me.state(AppState).messages = []
     me.navigate(

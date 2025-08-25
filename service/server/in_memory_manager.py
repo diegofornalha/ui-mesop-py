@@ -177,7 +177,7 @@ class InMemoryFakeAgentManager(ApplicationManager):
                     rval.append((messageid, ''))
                 elif task.history and task.history[-1].parts:
                     if len(task.history) == 1:
-                        rval.append((messageid, 'Working...'))
+                        rval.append((messageid, 'Pensando...'))
                     else:
                         part = task.history[-1].parts[0]
                         # Handle both dict and object formats
@@ -199,7 +199,7 @@ class InMemoryFakeAgentManager(ApplicationManager):
                         rval.append(
                             (
                                 messageid,
-                                text if text else 'Working...',
+                                text if text else 'Pensando...',
                             )
                         )
             else:

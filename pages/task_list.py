@@ -5,9 +5,9 @@ from state.state import AppState
 
 
 def task_list_page(app_state: AppState):
-    """Task List Page"""
+    """Página da Lista de Tarefas"""
     with page_scaffold():  # pylint: disable=not-context-manager
         with page_frame():
-            with header('Task List', 'task'):
+            with header('Lista de Tarefas', 'task'):
                 pass
             task_card(app_state.task_list)

@@ -13,11 +13,11 @@ from utils.agent_card import get_agent_card
 
 
 def agent_list_page(app_state: AppState) -> None:
-    """Agents List Page."""
+    """Página da Lista de Agentes."""
     state = me.state(AgentState)
     with page_scaffold():  # pylint: disable=not-context-manager
         with page_frame():
-            with header('Remote Agents', 'smart_toy'):
+            with header('Agentes Remotos', 'smart_toy'):
                 pass
             agents = asyncio.run(ListRemoteAgents())
             agents_list(agents)
@@ -28,7 +28,7 @@ def agent_list_page(app_state: AppState) -> None:
                     )
                 ):
                     me.input(
-                        label='Agent Address',
+                        label='Endereço do Agente',
                         on_blur=set_agent_address,
                         placeholder='localhost:10000',
                     )
@@ -39,33 +39,33 @@ def agent_list_page(app_state: AppState) -> None:
                     if state.error != '':
                         me.text(state.error, style=me.Style(color='red'))
                     if state.agent_name != '':
-                        me.text(f'Agent Name: {state.agent_name}')
+                        me.text(f'Nome do Agente: {state.agent_name}')
                     if state.agent_description:
-                        me.text(f'Agent Description: {state.agent_description}')
+                        me.text(f'Descrição do Agente: {state.agent_description}')
                     if state.agent_framework_type:
                         me.text(
-                            f'Agent Framework Type: {state.agent_framework_type}'
+                            f'Tipo de Framework do Agente: {state.agent_framework_type}'
                         )
                     if state.input_modes:
-                        me.text(f'Input Modes: {input_modes_string}')
+                        me.text(f'Modos de Entrada: {input_modes_string}')
                     if state.output_modes:
-                        me.text(f'Output Modes: {output_modes_string}')
+                        me.text(f'Modos de Saída: {output_modes_string}')
                     if state.extensions:
-                        me.text(f'Extensions: {extensions_string}')
+                        me.text(f'Extensões: {extensions_string}')
 
                     if state.agent_name:
                         me.text(
-                            f'Streaming Supported: {state.stream_supported}'
+                            f'Streaming Suportado: {state.stream_supported}'
                         )
                         me.text(
-                            f'Push Notifications Supported: {state.push_notifications_supported}'
+                            f'Notificações Push Suportadas: {state.push_notifications_supported}'
                         )
                 with dialog_actions():
                     if not state.agent_name:
-                        me.button('Read', on_click=load_agent_info)
+                        me.button('Ler', on_click=load_agent_info)
                     elif not state.error:
-                        me.button('Save', on_click=save_agent)
-                    me.button('Cancel', on_click=cancel_agent_dialog)
+                        me.button('Salvar', on_click=save_agent)
+                    me.button('Cancelar', on_click=cancel_agent_dialog)
 
 
 def set_agent_address(e: me.InputBlurEvent) -> None:
@@ -98,7 +98,7 @@ async def load_agent_info(e: me.ClickEvent) -> None:
     except Exception as e:
         print(e)
         state.agent_name = None
-        state.error = f'Cannot connect to agent as {state.agent_address}'
+        state.error = f'Não foi possível conectar ao agente em {state.agent_address}'
 
 
 def cancel_agent_dialog(e: me.ClickEvent) -> None:

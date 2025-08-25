@@ -445,7 +445,7 @@ class ADKHostManager(ApplicationManager):
                     rval.append((message_id, ''))
                 elif task.history and task.history[-1].parts:
                     if len(task.history) == 1:
-                        rval.append((message_id, 'Working...'))
+                        rval.append((message_id, 'Pensando...'))
                     else:
                         part = task.history[-1].parts[0]
                         # Handle both dict and object formats
@@ -467,7 +467,7 @@ class ADKHostManager(ApplicationManager):
                         rval.append(
                             (
                                 message_id,
-                                text if text else 'Working...',
+                                text if text else 'Pensando...',
                             )
                         )
             else:

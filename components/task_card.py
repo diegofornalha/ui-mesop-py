@@ -14,17 +14,17 @@ def message_string(content: ContentPart) -> str:
 
 @me.component
 def task_card(tasks: list[SessionTask]):
-    """Task card component"""
-    columns = ['Conversation ID', 'Task ID', 'Description', 'Status', 'Output']
+    """Componente do card de tarefas"""
+    columns = ['ID da Conversa', 'ID da Tarefa', 'Descrição', 'Status', 'Saída']
     df_data: dict[str, list[str]] = dict([(c, []) for c in columns])
     for task in tasks:
-        df_data['Conversation ID'].append(task.contextId)
-        df_data['Task ID'].append(task.task.taskId or '')
-        df_data['Description'].append(
+        df_data['ID da Conversa'].append(task.contextId)
+        df_data['ID da Tarefa'].append(task.task.taskId or '')
+        df_data['Descrição'].append(
             '\n'.join(message_string(x[0]) for x in task.task.message.content)
         )
         df_data['Status'].append(task.task.state)
-        df_data['Output'].append(flatten_artifacts(task.task))
+        df_data['Saída'].append(flatten_artifacts(task.task))
     df = pd.DataFrame(pd.DataFrame(df_data), columns=columns)
     with me.box(
         style=me.Style(

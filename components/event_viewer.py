@@ -19,28 +19,28 @@ def flatten_content(content: list[tuple[str, str]]) -> str:
 
 @me.component
 def event_list():
-    """Events list component"""
+    """Componente da lista de eventos"""
     df_data = {
-        'Conversation ID': [],
-        'Actor': [],
-        'Role': [],
-        'Id': [],
-        'Content': [],
+        'ID da Conversa': [],
+        'Ator': [],
+        'Função': [],
+        'ID': [],
+        'Conteúdo': [],
     }
     events = asyncio.run(GetEvents())
     for e in events:
         event = convert_event_to_state(e)
-        df_data['Conversation ID'].append(event.contextId)  # Usar camelCase
-        df_data['Role'].append(event.role)
-        df_data['Id'].append(event.id)
-        df_data['Content'].append(flatten_content(event.content))
-        df_data['Actor'].append(event.actor)
-    if not df_data['Conversation ID']:
-        me.text('No events found')
+        df_data['ID da Conversa'].append(event.contextId)  # Usar camelCase
+        df_data['Função'].append(event.role)
+        df_data['ID'].append(event.id)
+        df_data['Conteúdo'].append(flatten_content(event.content))
+        df_data['Ator'].append(event.actor)
+    if not df_data['ID da Conversa']:
+        me.text('Nenhum evento encontrado')
         return
     df = pd.DataFrame(
         pd.DataFrame(df_data),
-        columns=['Conversation ID', 'Actor', 'Role', 'Id', 'Content'],
+        columns=['ID da Conversa', 'Ator', 'Função', 'ID', 'Conteúdo'],
     )
     with me.box(
         style=me.Style(
@@ -53,10 +53,10 @@ def event_list():
             df,
             header=me.TableHeader(sticky=True),
             columns={
-                'Conversation ID': me.TableColumn(sticky=True),
-                'Actor': me.TableColumn(sticky=True),
-                'Role': me.TableColumn(sticky=True),
-                'Id': me.TableColumn(sticky=True),
-                'Content': me.TableColumn(sticky=True),
+                'ID da Conversa': me.TableColumn(sticky=True),
+                'Ator': me.TableColumn(sticky=True),
+                'Função': me.TableColumn(sticky=True),
+                'ID': me.TableColumn(sticky=True),
+                'Conteúdo': me.TableColumn(sticky=True),
             },
         )

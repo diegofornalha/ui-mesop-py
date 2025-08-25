@@ -112,7 +112,7 @@ def chat_box(
                     ),
                 ):
                     if not progress_text:
-                        progress_text = 'Working...'
+                        progress_text = 'Pensando...'
                     me.text(
                         progress_text,
                         style=me.Style(

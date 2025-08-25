@@ -8,19 +8,19 @@ from styles.colors import BACKGROUND
 
 @me.stateclass
 class PageState:
-    """Local Page State"""
+    """Estado Local da Página"""
 
     temp_name: str = ''
 
 
 def on_blur_set_name(e: me.InputBlurEvent):
-    """Input handler"""
+    """Manipulador de entrada"""
     state = me.state(PageState)
     state.temp_name = e.value
 
 
 def on_change_name(_):
-    """Change name handler for both enter and click events"""
+    """Manipulador de mudança de nome para eventos de enter e clique"""
     state = me.state(PageState)
     app_state = me.state(AppState)
     app_state.name = state.temp_name
@@ -29,7 +29,7 @@ def on_change_name(_):
 
 
 def home_page_content(app_state: AppState):
-    """Home Page"""
+    """Página Inicial"""
     with me.box(
         style=me.Style(
             display='flex',
@@ -53,6 +53,6 @@ def home_page_content(app_state: AppState):
                     width='100%',
                 )
             ):
-                with header('Conversations', 'message'):
+                with header('Conversas', 'message'):
                     pass
                 conversation_list(app_state.conversations)

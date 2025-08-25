@@ -116,12 +116,12 @@ def chat_page():
 
 @me.page(
     path='/event_list',
-    title='Event List',
+    title='Lista de Eventos',
     on_load=on_load,
     security_policy=security_policy,
 )
 def event_page():
-    """Event List Page."""
+    """Página da Lista de Eventos."""
     api_key_dialog()
     event_list_page(me.state(AppState))
 
