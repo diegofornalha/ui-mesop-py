@@ -26,7 +26,9 @@ def mesop_chat_bubble(message: StateMessage, is_user: bool = False):
     # Container da mensagem com alinhamento baseado no remetente
     with me.box(
         style=me.Style(
-            **RESPONSIVE_CHAT_BUBBLE_CONTAINER.to_dict(),
+            display="flex",
+            width="100%",
+            margin=me.Margin.symmetric(vertical=8),
             justify_content="flex-end" if is_user else "flex-start",
         )
     ):

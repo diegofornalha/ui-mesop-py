@@ -57,7 +57,7 @@ def render_responsive_header():
                 align_items="center",
                 justify_content="space-between",
                 max_width="1200px",
-                margin=me.Margin.symmetric(horizontal="auto"),
+                margin="0 auto",
                 width="100%",
             )
         ):

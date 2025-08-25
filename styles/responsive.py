@@ -123,7 +123,7 @@ def get_container_style(is_mobile: bool = False) -> me.Style:
         flex_direction="column",
         width="100%",
         max_width=f"{MAX_CONTENT_WIDTH}px" if not is_mobile else "100%",
-        margin=me.Margin(left="auto", right="auto"),
+        margin=me.Margin.symmetric(horizontal=0, vertical=36),
         padding=get_responsive_padding(is_mobile=is_mobile),
     )
 

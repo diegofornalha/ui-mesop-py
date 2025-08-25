@@ -213,7 +213,7 @@ def responsive_page_frame():
             height="100%",
             width="100%",
             max_width=f"{config.chat_bubble_max_width}px" if not responsive_state.is_mobile else "100%",
-            margin=me.Margin(left="auto", right="auto"),
+            margin="0 auto",
             padding=me.Padding(
                 top=config.padding,
                 left=config.padding,

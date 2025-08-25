@@ -34,7 +34,7 @@ def create_responsive_style(
 
 
 def responsive_container(
-    horizontal_margin: str = "auto",
+    horizontal_margin: int = 0,
     vertical_margin: int = 36,
     max_width: str = "min(1200px, 100%)",
     padding: Optional[me.Padding] = None,
@@ -43,7 +43,7 @@ def responsive_container(
     Cria um container responsivo seguindo o padrão DuoChat.
     
     Args:
-        horizontal_margin: Margem horizontal (geralmente "auto" para centralizar)
+        horizontal_margin: Margem horizontal em pixels
         vertical_margin: Margem vertical em pixels
         max_width: Largura máxima responsiva
         padding: Padding opcional
@@ -56,7 +56,7 @@ def responsive_container(
         "margin": me.Margin.symmetric(
             horizontal=horizontal_margin,
             vertical=vertical_margin,
-        ),
+        ) if horizontal_margin != 0 else me.Margin(top=vertical_margin, bottom=vertical_margin, left=0, right=0),
         "display": "flex",
         "flex_direction": "column",
     }
@@ -141,7 +141,7 @@ RESPONSIVE_HEADER_STYLE = me.Style(
 RESPONSIVE_MAIN_CONTENT_STYLE = me.Style(
     flex_grow=1,
     width="min(1200px, 100%)",
-    margin=me.Margin.symmetric(horizontal="auto"),
+    margin="0 auto",
     padding=me.Padding.symmetric(horizontal=16, vertical=24),
 )
 
@@ -167,7 +167,7 @@ RESPONSIVE_INPUT_WRAPPER_STYLE = me.Style(
     border="1px solid #e0e0e0",
     display="flex",
     width="min(800px, 100%)",
-    margin=me.Margin.symmetric(horizontal="auto"),
+    margin="0 auto",
     align_items="center",
     gap=8,
 )
