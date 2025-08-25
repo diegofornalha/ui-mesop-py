@@ -1,11 +1,14 @@
 import mesop as me
-from styles.colors import BACKGROUND
+from styles.colors import BACKGROUND, TEXT_SECONDARY
 
 
 SIDENAV_MIN_WIDTH = 68
 SIDENAV_MAX_WIDTH = 200
 
-DEFAULT_MENU_STYLE = me.Style(align_content='left')
+DEFAULT_MENU_STYLE = me.Style(
+    align_content='left',
+    color=TEXT_SECONDARY,  # Cinza médio sempre
+)
 
 _FANCY_TEXT_GRADIENT = me.Style(
     color='transparent',

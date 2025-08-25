@@ -1,6 +1,7 @@
 import mesop as me
 
 from state.state import AppState
+from styles.colors import TEXT_SECONDARY
 from styles.styles import (
     DEFAULT_MENU_STYLE,
     SIDENAV_MAX_WIDTH,
@@ -110,7 +111,7 @@ def menu_item(
                 type='icon',
             ):
                 with me.tooltip(message=text):
-                    me.icon(icon=icon)
+                    me.icon(icon=icon, style=me.Style(color=TEXT_SECONDARY))
 
     else:  # expanded
         with me.content_button(
@@ -126,8 +127,8 @@ def menu_item(
                     align_items='center',
                 ),
             ):
-                me.icon(icon=icon)
-                me.text(text)
+                me.icon(icon=icon, style=me.Style(color=TEXT_SECONDARY))
+                me.text(text, style=me.Style(color=TEXT_SECONDARY))
 
 
 # Funções de toggle de tema removidas - usando cores fixas
