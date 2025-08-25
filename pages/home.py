@@ -19,17 +19,8 @@ def on_blur_set_name(e: me.InputBlurEvent):
     state.temp_name = e.value
 
 
-def on_enter_change_name(e: me.components.input.input.InputEnterEvent):  # pylint: disable=unused-argument
-    """Change name button handler"""
-    state = me.state(PageState)
-    app_state = me.state(AppState)
-    app_state.name = state.temp_name
-    app_state.greeting = ''  # reset greeting
-    yield
-
-
-def on_click_change_name(e: me.ClickEvent):  # pylint: disable=unused-argument
-    """Change name button handler"""
+def on_change_name(_):
+    """Change name handler for both enter and click events"""
     state = me.state(PageState)
     app_state = me.state(AppState)
     app_state.name = state.temp_name
@@ -48,14 +39,14 @@ def home_page_content(app_state: AppState):
     ):
         with me.box(
             style=me.Style(
-                background=BACKGROUND,  # Branco limpo
+                background=BACKGROUND,
                 height='100%',
                 margin=me.Margin(bottom=20),
             )
         ):
             with me.box(
                 style=me.Style(
-                    background=BACKGROUND,  # Branco limpo
+                    background=BACKGROUND,
                     padding=me.Padding(top=24, left=24, right=24, bottom=24),
                     display='flex',
                     flex_direction='column',

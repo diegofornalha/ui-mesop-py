@@ -32,7 +32,6 @@ load_dotenv()
 def on_load(e: me.LoadEvent):  # pylint: disable=unused-argument
     """On load event"""
     state = me.state(AppState)
-    # Theme mode removido - usando cores fixas
     if 'conversationid' in me.query_params:
         state.current_conversation_id = me.query_params['conversationid']
     else:

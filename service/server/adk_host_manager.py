@@ -31,8 +31,8 @@ from google.adk.events.event_actions import EventActions as ADKEventActions
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.sessions.in_memory_session_service import InMemorySessionService
 from google.genai import types
-from host_agent import HostAgent
-from remote_agent_connection import TaskCallbackArg
+from utils.host_agent import HostAgent
+from utils.remote_agent_connection import TaskCallbackArg
 from utils.agent_card import get_agent_card
 
 from service.server.application_manager import ApplicationManager
@@ -409,7 +409,6 @@ class ADKHostManager(ApplicationManager):
             current_temp_artifact = self._artifact_chunks[artifact.artifact_id][
                 -1
             ]
-            # TODO handle if current_temp_artifact is missing
             current_temp_artifact.parts.extend(artifact.parts)
             if task_update_event.last_chunk:
                 if current_task.artifacts:

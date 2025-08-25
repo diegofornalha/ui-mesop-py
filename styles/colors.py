@@ -55,32 +55,3 @@ BUTTON_SECONDARY_TEXT = TEXT_ON_SECONDARY
 INPUT_BACKGROUND = '#ffffff'
 INPUT_BORDER = '#e0e0e0'
 INPUT_FOCUS = PRIMARY
-
-# Função helper para obter cor
-def get_color(color_name: str) -> str:
-    """
-    Retorna a cor correspondente ao nome fornecido
-    
-    Args:
-        color_name: Nome da cor (ex: 'primary', 'background')
-    
-    Returns:
-        Código hex da cor ou fallback para cinza
-    """
-    color_map = {
-        'primary': PRIMARY,
-        'secondary': SECONDARY,
-        'accent': ACCENT,
-        'background': BACKGROUND,
-        'surface': SURFACE,
-        'error': ERROR,
-        'success': SUCCESS,
-        'warning': WARNING,
-        'info': INFO,
-        'on-surface': TEXT_PRIMARY,
-        'on-primary': TEXT_ON_PRIMARY,
-        'primary-container': CONTAINER_PRIMARY,
-        'secondary-container': CONTAINER_SECONDARY,
-    }
-    
-    return color_map.get(color_name, '#757575')  # Fallback para cinza médio

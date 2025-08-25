@@ -84,7 +84,6 @@ def sidenav(current_page: str):
                     page['display'],
                     not app_state.sidenav_open,
                 )
-            # Removido toggle de tema - usando cores fixas
 
 
 def menu_item(
@@ -131,7 +130,6 @@ def menu_item(
                 me.text(text, style=me.Style(color=TEXT_SECONDARY))
 
 
-# Funções de toggle de tema removidas - usando cores fixas
 
 
 MENU_BOTTOM = me.Style(

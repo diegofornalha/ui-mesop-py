@@ -21,7 +21,7 @@ def on_api_key_change(e: me.InputBlurEvent):
 
 @me.stateclass
 class UpdateStatus:
-    """Status for API key update"""
+    """Status para atualização da chave API"""
 
     show_success: bool = False
 
@@ -46,14 +46,14 @@ async def update_api_key(e: me.ClickEvent):
 
 
 def settings_page_content():
-    """Settings Page Content."""
+    """Conteúdo da Página de Configurações."""
     settings_state = me.state(SettingsState)
     app_state = me.state(AppState)
     update_status = me.state(UpdateStatus)
 
     with page_scaffold():  # pylint: disable=not-context-manager
         with page_frame():
-            with header('Settings', 'settings'):
+            with header('Configurações', 'settings'):
                 pass
             with me.box(
                 style=me.Style(
@@ -73,7 +73,7 @@ def settings_page_content():
                         )
                     ):
                         me.text(
-                            'Google API Key',
+                            'Chave API do Google',
                             type='headline-6',
                             style=me.Style(
                                 margin=me.Margin(bottom=15),
@@ -91,7 +91,7 @@ def settings_page_content():
                             )
                         ):
                             me.input(
-                                label='API Key',
+                                label='Chave API',
                                 value=app_state.api_key,
                                 on_blur=on_api_key_change,
                                 type='password',
@@ -100,7 +100,7 @@ def settings_page_content():
                             )
 
                             me.button(
-                                'Update',
+                                'Atualizar',
                                 type='raised',
                                 on_click=update_api_key,
                                 style=me.Style(
@@ -132,7 +132,7 @@ def settings_page_content():
                                     ),
                                 )
                                 me.text(
-                                    'API Key updated successfully',
+                                    'Chave API atualizada com sucesso',
                                     style=me.Style(
                                         color=TEXT_ON_PRIMARY,  # Texto branco
                                     ),
@@ -146,11 +146,11 @@ def settings_page_content():
 
                 # Output Types Section
                 me.select(
-                    label='Supported Output Types',
+                    label='Tipos de Saída Suportados',
                     options=[
-                        me.SelectOption(label='Image', value='image/*'),
+                        me.SelectOption(label='Imagem', value='image/*'),
                         me.SelectOption(
-                            label='Text (Plain)', value='text/plain'
+                            label='Texto (Simples)', value='text/plain'
                         ),
                     ],
                     on_selection_change=on_selection_change_output_types,
