@@ -174,7 +174,7 @@ def conversation():
             )
         ):
             me.input(
-                label='How can I help you?',
+                label='Como posso ajudar?',
                 on_blur=on_blur,
                 on_enter=send_message_enter,
                 style=me.Style(min_width='80vw'),
