@@ -142,7 +142,22 @@ async def UpdateAppState(state: AppState, conversationid: str):
             if not messages:
                 state.messages = []
             else:
-                state.messages = [convert_message_to_state(x) for x in messages]
+                # Converter mensagens e aplicar lógica alternada para detectar role
+                converted_messages = []
+                for i, msg in enumerate(messages):
+                    # Mensagens ímpares (0, 2, 4...) são do usuário
+                    # Mensagens pares (1, 3, 5...) são do agente
+                    state_msg = convert_message_to_state(msg)
+                    
+                    # Se o role não foi detectado corretamente, usar posição
+                    if state_msg.role == 'user' and i % 2 == 1:
+                        # Posição ímpar deve ser agente
+                        state_msg.role = 'agent'
+                        print(f"[DEBUG] Corrigido message {state_msg.messageId} para agent pela posição {i}")
+                    
+                    converted_messages.append(state_msg)
+                
+                state.messages = converted_messages
         conversations = await ListConversations()
         if not conversations:
             state.conversations = []
@@ -190,7 +205,10 @@ def convert_message_to_state(message: Message) -> StateMessage:
     if not message:
         return StateMessage()
 
-    # Verificar se role existe e é enum ou string
+    # Estratégia múltipla para detectar role
+    role_value = 'user'  # Valor padrão
+    
+    # 1. Verificar se role existe e é enum ou string
     if hasattr(message, 'role') and message.role is not None:
         if hasattr(message.role, 'name'):
             role_value = message.role.name
@@ -198,16 +216,32 @@ def convert_message_to_state(message: Message) -> StateMessage:
         else:
             role_value = str(message.role)
             print(f"[DEBUG] Message {message.messageId}: Role string = {role_value}")
-    else:
-        # Tentar detectar se é resposta do agente pelo author
-        if hasattr(message, 'author') and 'agent' in str(message.author).lower():
+    
+    # 2. Se não tem role, verificar taskId (mensagens com taskId geralmente são do agente)
+    elif hasattr(message, 'taskId') and message.taskId:
+        role_value = 'agent'
+        print(f"[DEBUG] Message {message.messageId}: Detectado como agent pelo taskId: {message.taskId}")
+    
+    # 3. Verificar se tem author e contém 'agent' ou 'gemini'
+    elif hasattr(message, 'author'):
+        author_str = str(message.author).lower()
+        if 'agent' in author_str or 'gemini' in author_str or 'ai' in author_str:
             role_value = 'agent'
             print(f"[DEBUG] Message {message.messageId}: Detectado como agent pelo author: {message.author}")
         else:
-            role_value = 'user'  # Valor padrão
-            print(f"[DEBUG] Message {message.messageId}: Usando padrão user - role não encontrado")
+            print(f"[DEBUG] Message {message.messageId}: Author encontrado mas não é agent: {message.author}")
+    
+    # 4. Verificar conteúdo da mensagem (heurística adicional)
+    elif hasattr(message, 'parts') and message.parts:
+        # Se a mensagem tem conteúdo complexo ou formatado, pode ser do agente
+        content_str = str(message.parts).lower()
+        if 'olá' in content_str and 'como posso' in content_str:
+            role_value = 'agent'
+            print(f"[DEBUG] Message {message.messageId}: Detectado como agent pelo conteúdo")
+    else:
+        print(f"[DEBUG] Message {message.messageId}: Usando padrão user - nenhuma detecção funcionou")
 
-    # Log adicional para debug
+    # Log final
     print(f"[DEBUG] Final role for message {message.messageId}: {role_value}")
 
     return StateMessage(
