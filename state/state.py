@@ -14,20 +14,80 @@ ContentPart = str | dict[str, Any]
 class StateConversation:
     """StateConversation provides mesop state compliant view of a conversation"""
 
-    conversationid: str = ''
-    conversationname: str = ''
-    isactive: bool = True
-    messageids: list[str] = dataclasses.field(default_factory=list)
+    conversationId: str = ''
+    conversationName: str = ''
+    isActive: bool = True
+    messageIds: list[str] = dataclasses.field(default_factory=list)
+    
+    # Propriedades para compatibilidade com snake_case
+    @property
+    def conversation_id(self) -> str:
+        return self.conversationId
+    
+    @property
+    def conversation_name(self) -> str:
+        return self.conversationName
+    
+    @property
+    def is_active(self) -> bool:
+        return self.isActive
+    
+    @property
+    def message_ids(self) -> list[str]:
+        return self.messageIds
+    
+    # Propriedades para compatibilidade com lowercase
+    @property
+    def conversationid(self) -> str:
+        return self.conversationId
+    
+    @property
+    def conversationname(self) -> str:
+        return self.conversationName
+    
+    @property
+    def isactive(self) -> bool:
+        return self.isActive
+    
+    @property
+    def messageids(self) -> list[str]:
+        return self.messageIds
 
 
 @dataclass
 class StateMessage:
     """StateMessage provides mesop state compliant view of a message"""
 
-    messageid: str = ''
-    taskid: str = ''
-    contextid: str = ''
+    messageId: str = ''
+    taskId: str = ''
+    contextId: str = ''
     role: str = ''
+    
+    # Propriedades para compatibilidade com snake_case
+    @property
+    def message_id(self) -> str:
+        return self.messageId
+    
+    @property
+    def task_id(self) -> str:
+        return self.taskId
+    
+    @property
+    def context_id(self) -> str:
+        return self.contextId
+    
+    # Propriedades para compatibilidade com lowercase
+    @property
+    def messageid(self) -> str:
+        return self.messageId
+    
+    @property
+    def taskid(self) -> str:
+        return self.taskId
+    
+    @property
+    def contextid(self) -> str:
+        return self.contextId
     # Each content entry is a content, media type pair.
     content: list[tuple[ContentPart, str]] = dataclasses.field(
         default_factory=list
@@ -38,9 +98,26 @@ class StateMessage:
 class StateTask:
     """StateTask provides mesop state compliant view of task"""
 
-    taskid: str = ''
-    contextid: str | None = None
+    taskId: str = ''
+    contextId: str | None = None
     state: str | None = None
+    
+    # Propriedades para compatibilidade
+    @property
+    def task_id(self) -> str:
+        return self.taskId
+    
+    @property
+    def context_id(self) -> str | None:
+        return self.contextId
+    
+    @property
+    def taskid(self) -> str:
+        return self.taskId
+    
+    @property
+    def contextid(self) -> str | None:
+        return self.contextId
     message: StateMessage = dataclasses.field(default_factory=StateMessage)
     artifacts: list[list[tuple[ContentPart, str]]] = dataclasses.field(
         default_factory=list
@@ -51,18 +128,36 @@ class StateTask:
 class SessionTask:
     """SessionTask organizes tasks based on conversation"""
 
-    contextid: str = ''
+    contextId: str = ''
     task: StateTask = dataclasses.field(default_factory=StateTask)
+    
+    # Propriedades para compatibilidade
+    @property
+    def context_id(self) -> str:
+        return self.contextId
+    
+    @property
+    def contextid(self) -> str:
+        return self.contextId
 
 
 @dataclass
 class StateEvent:
     """StateEvent provides mesop state compliant view of event"""
 
-    contextid: str = ''
+    contextId: str = ''
     actor: str = ''
     role: str = ''
     id: str = ''
+    
+    # Propriedades para compatibilidade
+    @property
+    def context_id(self) -> str:
+        return self.contextId
+    
+    @property
+    def contextid(self) -> str:
+        return self.contextId
     # Each entry is a pair of (content, media type)
     content: list[tuple[ContentPart, str]] = dataclasses.field(
         default_factory=list

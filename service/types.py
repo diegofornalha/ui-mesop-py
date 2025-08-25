@@ -27,12 +27,12 @@ class AgentCard(BaseModel):
 
 
 class Message(BaseModel):
-    """Representa uma mensagem - aceita múltiplas variações de campos"""
-    messageId: str  # Campo principal em camelCase
+    """Representa uma mensagem - padrão A2A Protocol"""
+    messageId: str  # Campo principal em camelCase (A2A Protocol)
     content: str = ""  # Valor padrão vazio
     author: str = ""  # Valor padrão vazio
     timestamp: float = 0.0
-    context_id: Optional[str] = None
+    contextId: Optional[str] = Field(default=None, alias="context_id")  # Padrão camelCase com alias Python
     parts: List[Any] = Field(default_factory=list)
     
     @model_validator(mode='before')
@@ -59,10 +59,7 @@ class Message(BaseModel):
                 if key in values and 'author' not in values:
                     values['author'] = values.pop(key)
             
-            # Normalizar context_id
-            for key in ['contextId', 'contextid', 'context_Id']:
-                if key in values and 'context_id' not in values:
-                    values['context_id'] = values.pop(key)
+            # contextId é tratado automaticamente pelo alias Pydantic
                     
         return values
     

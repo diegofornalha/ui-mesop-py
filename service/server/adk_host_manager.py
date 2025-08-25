@@ -57,7 +57,7 @@ class ADKHostManager(ApplicationManager):
         self._messages: list[Message] = []
         self._tasks: list[Task] = []
         self._events: dict[str, Event] = {}
-        self._pending_messageids: list[str] = []
+        self._pending_messageIds: list[str] = []
         self._agents: list[AgentCard] = []
         self._artifact_chunks: dict[str, list[Artifact]] = {}
         self._session_service = InMemorySessionService()

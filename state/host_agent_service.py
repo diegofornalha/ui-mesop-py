@@ -155,7 +155,7 @@ async def UpdateAppState(state: AppState, conversationid: str):
         for task in await GetTasks():
             state.task_list.append(
                 SessionTask(
-                    contextid=extract_conversation_id(task),
+                    contextId=extract_conversation_id(task),
                     task=convert_task_to_state(task),
                 )
             )
@@ -197,9 +197,9 @@ def convert_message_to_state(message: Message) -> StateMessage:
         role_value = str(message.role)
 
     return StateMessage(
-        messageid=message.messageid,
-        contextid=message.context_id if message.context_id else '',
-        taskid=message.taskid if message.taskid else '',
+        messageId=message.messageId,  # Usando camelCase padrão
+        contextId=message.contextId if message.contextId else '',
+        taskId=message.taskId if hasattr(message, 'taskId') else '',
         role=role_value,
         content=extract_content(message.parts),
     )
@@ -209,10 +209,10 @@ def convert_conversation_to_state(
     conversation: Conversation,
 ) -> StateConversation:
     return StateConversation(
-        conversationid=conversation.conversationid,
-        conversationname=conversation.name,
-        isactive=conversation.isactive,
-        messageids=[extract_message_id(x) for x in conversation.messages],
+        conversationId=conversation.conversationid,  # Fonte ainda usa lowercase
+        conversationName=conversation.name,
+        isActive=conversation.isactive,
+        messageIds=[extract_message_id(x) for x in conversation.messages],
     )
 
 
@@ -225,13 +225,13 @@ def convert_task_to_state(task: Task) -> StateTask:
     )
     if not task.history:
         return StateTask(
-            taskid=task.id,
-            contextid=task.context_id,
+            taskId=task.id,
+            contextId=task.context_id,
             state=TaskState.failed.name,
             message=StateMessage(
-                messageid=str(uuid.uuid4()),
-                contextid=task.context_id,
-                taskid=task.id,
+                messageId=str(uuid.uuid4()),
+                contextId=task.context_id,
+                taskId=task.id,
                 role='agent',  # Role.agent.name simplificado para evitar erro
                 content=[('No history', 'text')],
             ),
@@ -242,8 +242,8 @@ def convert_task_to_state(task: Task) -> StateTask:
     if last_message != message:
         output = [extract_content(last_message.parts)] + output
     return StateTask(
-        taskid=task.id,
-        contextid=task.context_id,
+        taskId=task.id,
+        contextId=task.context_id,
         state=str(task.status.state),
         message=convert_message_to_state(message),
         artifacts=output,
@@ -258,7 +258,7 @@ def convert_event_to_state(event: Event) -> StateEvent:
         role_value = str(event.content.role)
     
     return StateEvent(
-        contextid=extract_message_conversation(event.content),
+        contextId=extract_message_conversation(event.content),
         actor=event.actor,
         role=role_value,
         id=event.id,
@@ -313,12 +313,16 @@ def extract_content(
 
 def extract_message_id(message: Message) -> str:
     if isinstance(message, dict):
-        return message.get('messageid', message.get('messageId', ''))
-    return getattr(message, 'messageid', '')
+        return message.get('messageId', message.get('messageid', ''))
+    # Tentar primeiro messageId (padrão), depois messageid (compatibilidade)
+    return getattr(message, 'messageId', getattr(message, 'messageid', ''))
 
 
 def extract_message_conversation(message: Message) -> str:
-    return message.context_id if message.context_id else ''
+    # Tentar contextId primeiro (padrão), depois context_id (compatibilidade)
+    if hasattr(message, 'contextId'):
+        return message.contextId if message.contextId else ''
+    return message.context_id if hasattr(message, 'context_id') and message.context_id else ''
 
 
 def extract_conversation_id(task: Task) -> str:
