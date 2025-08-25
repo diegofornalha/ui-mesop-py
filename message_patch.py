@@ -45,55 +45,34 @@ class MessagePatched(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(default=None)
     
     def __init__(self, **data):
-        """Override init para normalizar campos"""
-        # Normalizar messageId - aceitar TODAS as variações possíveis
-        id_variations = [
-            'messageid', 'messageId', 'message_id', 'message_Id', 
-            'MessageId', 'MessageID', 'id', 'ID', 'Id'
-        ]
-        for key in id_variations:
-            if key in data:
-                if 'messageId' not in data:
-                    data['messageId'] = data[key]
-                # Não remover o campo original ainda, pode ser necessário
-                if key != 'messageId':
-                    data.pop(key, None)
+        """Override init para normalizar campos - SIMPLIFICADO"""
+        # Normalizar messageId - apenas 3 formatos principais
+        if 'messageid' in data:
+            data['messageId'] = data.pop('messageid')
+        elif 'message_id' in data:
+            data['messageId'] = data.pop('message_id')
         
         # Se ainda não tiver messageId, criar um
         if 'messageId' not in data:
             data['messageId'] = str(uuid4())
         
-        # Normalizar text/content
-        content_variations = ['text', 'message', 'body', 'Text', 'TEXT']
-        for key in content_variations:
-            if key in data and 'content' not in data:
-                data['content'] = data.pop(key)
+        # Normalizar text/content - apenas 'text' como alternativa
+        if 'text' in data and 'content' not in data:
+            data['content'] = data.pop('text')
         
-        # Normalizar author
-        author_variations = [
-            'user', 'userId', 'user_id', 'sender', 'from', 
-            'User', 'UserID', 'userid', 'author_id'
-        ]
-        for key in author_variations:
-            if key in data and 'author' not in data:
-                data['author'] = data.pop(key)
+        # Normalizar author - apenas formatos essenciais
+        if 'user' in data and 'author' not in data:
+            data['author'] = data.pop('user')
+        elif 'user_id' in data and 'author' not in data:
+            data['author'] = data.pop('user_id')
         
-        # Normalizar contextId - aceitar todas as variações
-        context_variations = [
-            'context_id', 'contextid', 'context_Id', 'ContextId',
-            'contextID', 'context'
-        ]
-        for key in context_variations:
-            if key in data and 'contextId' not in data:
-                data['contextId'] = data[key]
-                if key != 'contextId':
-                    data.pop(key, None)
+        # Normalizar contextId - apenas 2 formatos
+        if 'context_id' in data:
+            data['contextId'] = data.pop('context_id')
+        elif 'contextid' in data:
+            data['contextId'] = data.pop('contextid')
         
-        # Normalizar role - preservar o tipo original (Role enum ou string)
-        role_variations = ['Role', 'ROLE', 'user_role', 'userRole']
-        for key in role_variations:
-            if key in data and 'role' not in data:
-                data['role'] = data.pop(key)
+        # Role - sem variações (já vem correto)
         
         # Se role é uma string, tentar converter para Role enum se possível
         if 'role' in data and HAS_A2A and Role:
@@ -113,40 +92,22 @@ class MessagePatched(BaseModel):
                 except:
                     pass  # Manter como string se der erro
         
-        # Normalizar taskId - aceitar todas as variações
-        taskid_variations = [
-            'task_id', 'taskid', 'task_Id',
-            'TaskId', 'TaskID', 'task', 'Task', 'TASK'
-        ]
-        for key in taskid_variations:
-            if key in data and 'taskId' not in data:
-                data['taskId'] = data[key]
-                if key != 'taskId' and key != 'task':
-                    data.pop(key, None)
+        # Normalizar taskId - apenas 2 formatos
+        if 'task_id' in data:
+            data['taskId'] = data.pop('task_id')
+        elif 'taskid' in data:
+            data['taskId'] = data.pop('taskid')
         
-        # Normalizar conversationId
-        conversation_variations = [
-            'conversation_id', 'conversationid', 'conversation_Id',
-            'ConversationId', 'ConversationID', 'conversation',
-            'Conversation', 'conv_id', 'convId'
-        ]
-        for key in conversation_variations:
-            if key in data and 'conversationId' not in data:
-                data['conversationId'] = data.pop(key)
+        # Normalizar conversationId - apenas 2 formatos  
+        if 'conversation_id' in data:
+            data['conversationId'] = data.pop('conversation_id')
+        elif 'conversationid' in data:
+            data['conversationId'] = data.pop('conversationid')
         
         # Chamar o init original
         super().__init__(**data)
     
-    # Propriedades Python MUTÁVEIS - retornam referências diretas
-    @property
-    def message_id_python(self) -> str:
-        """Propriedade Python - compatibilidade snake_case"""
-        return self.messageId
-    
-    @property
-    def context_id_python(self) -> Optional[str]:
-        """Propriedade Python - compatibilidade snake_case"""
-        return self.contextId
+    # Propriedades removidas - usar campos diretos
     
     @property
     def task_id_python(self) -> Optional[str]:
