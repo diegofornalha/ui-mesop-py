@@ -5,7 +5,7 @@ Conformidade total com A2A Protocol, Google ADK e Pydantic.
 
 from typing import Annotated, Any, Literal, Optional, Union, List, Tuple, Dict
 from uuid import uuid4
-from pydantic import BaseModel, Field, TypeAdapter, validator
+from pydantic import BaseModel, Field, TypeAdapter
 import sys
 
 # Tentar importar Role do a2a se disponível

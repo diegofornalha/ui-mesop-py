@@ -1,7 +1,5 @@
 import mesop as me
 
-from .poller import polling_buttons
-
 
 @me.content_component
 def header(title: str, icon: str):
@@ -22,4 +20,3 @@ def header(title: str, icon: str):
                 style=me.Style(font_family='Google Sans'),
             )
         me.slot()
-        polling_buttons()
