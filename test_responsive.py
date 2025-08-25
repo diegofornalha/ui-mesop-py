@@ -33,7 +33,7 @@ def test_responsive_page():
         style=me.Style(
             padding=me.Padding.all(24),
             max_width=1200,
-            margin="0 auto",
+            margin=me.Margin(left="auto", right="auto"),
         )
     ):
         # Título responsivo
