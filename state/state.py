@@ -31,39 +31,6 @@ class StateMessage:
     taskId: str | None = ''  # Aceitar None ou string vazia
     contextId: str = ''
     role: str = ''
-    
-    # Propriedades para compatibilidade com snake_case
-    # Propriedades Python com nomes DIFERENTES para evitar confusão
-    @property
-    def message_id_python(self) -> str:
-        """Propriedade read-only para compatibilidade Python"""
-        return self.messageId
-    
-    @property
-    def task_id_python(self) -> str:
-        """Propriedade read-only para compatibilidade Python"""
-        return self.taskId
-    
-    @property
-    def context_id_python(self) -> str:
-        """Propriedade read-only para compatibilidade Python"""
-        return self.contextId
-    
-    # Propriedades para compatibilidade com lowercase
-    @property
-    def messageid_python(self) -> str:
-        """Propriedade read-only para compatibilidade lowercase"""
-        return self.messageId
-    
-    @property
-    def taskid_python(self) -> str:
-        """Propriedade read-only para compatibilidade lowercase"""
-        return self.taskId
-    
-    @property
-    def contextid_python(self) -> str:
-        """Propriedade read-only para compatibilidade lowercase"""
-        return self.contextId
     # Each content entry is a content, media type pair.
     content: list[tuple[ContentPart, str]] = dataclasses.field(
         default_factory=list
@@ -77,27 +44,6 @@ class StateTask:
     taskId: str = ''
     contextId: str | None = None
     state: str | None = None
-    
-    # Propriedades Python com nomes DIFERENTES para evitar confusão
-    @property
-    def task_id_python(self) -> str:
-        """Propriedade read-only para compatibilidade Python"""
-        return self.taskId
-    
-    @property
-    def context_id_python(self) -> str | None:
-        """Propriedade read-only para compatibilidade Python"""
-        return self.contextId
-    
-    @property
-    def taskid_python(self) -> str:
-        """Propriedade read-only para compatibilidade lowercase"""
-        return self.taskId
-    
-    @property
-    def contextid_python(self) -> str | None:
-        """Propriedade read-only para compatibilidade lowercase"""
-        return self.contextId
     message: StateMessage = dataclasses.field(default_factory=StateMessage)
     artifacts: list[list[tuple[ContentPart, str]]] = dataclasses.field(
         default_factory=list
@@ -110,17 +56,6 @@ class SessionTask:
 
     contextId: str = ''
     task: StateTask = dataclasses.field(default_factory=StateTask)
-    
-    # Propriedades Python com nomes DIFERENTES para evitar confusão
-    @property
-    def context_id_python(self) -> str:
-        """Propriedade read-only para compatibilidade Python"""
-        return self.contextId
-    
-    @property
-    def contextid_python(self) -> str:
-        """Propriedade read-only para compatibilidade lowercase"""
-        return self.contextId
 
 
 @dataclass
@@ -131,17 +66,6 @@ class StateEvent:
     actor: str = ''
     role: str = ''
     id: str = ''
-    
-    # Propriedades Python com nomes DIFERENTES para evitar confusão
-    @property
-    def context_id_python(self) -> str:
-        """Propriedade read-only para compatibilidade Python"""
-        return self.contextId
-    
-    @property
-    def contextid_python(self) -> str:
-        """Propriedade read-only para compatibilidade lowercase"""
-        return self.contextId
     # Each entry is a pair of (content, media type)
     content: list[tuple[ContentPart, str]] = dataclasses.field(
         default_factory=list
