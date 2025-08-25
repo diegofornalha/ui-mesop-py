@@ -104,12 +104,12 @@ def another_page():
 
 @me.page(
     path='/conversation',
-    title='Conversation',
+    title='Conversa',
     on_load=on_load,
     security_policy=security_policy,
 )
 def chat_page():
-    """Conversation Page."""
+    """Página de Conversa."""
     api_key_dialog()
     conversation_page(me.state(AppState))
 
@@ -128,24 +128,24 @@ def event_page():
 
 @me.page(
     path='/settings',
-    title='Settings',
+    title='Configurações',
     on_load=on_load,
     security_policy=security_policy,
 )
 def settings_page():
-    """Settings Page."""
+    """Página de Configurações."""
     api_key_dialog()
     settings_page_content()
 
 
 @me.page(
     path='/task_list',
-    title='Task List',
+    title='Lista de Tarefas',
     on_load=on_load,
     security_policy=security_policy,
 )
 def task_page():
-    """Task List Page."""
+    """Página da Lista de Tarefas."""
     api_key_dialog()
     task_list_page(me.state(AppState))
 

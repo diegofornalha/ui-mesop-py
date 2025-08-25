@@ -7,10 +7,10 @@ from state.state import AppState
 
 
 def conversation_page(app_state: AppState):
-    """Conversation Page"""
+    """Página de Conversa"""
     state = me.state(AppState)
     with page_scaffold():  # pylint: disable=not-context-manager
         with page_frame():
-            with header('Conversation', 'chat'):
+            with header('Conversa', 'chat'):
                 pass
             conversation()
