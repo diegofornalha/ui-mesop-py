@@ -1,8 +1,8 @@
-# API Reference
+# Referência de API
 
-## 📚 Complete API Documentation
+## 📚 Documentação Completa da API
 
-### Core Types
+### Tipos Centrais
 
 #### Message
 ```python
@@ -38,7 +38,7 @@ class Task(BaseModel):
     status: str = "pending"
 ```
 
-### State Management
+### Gerenciamento de Estado
 
 #### AppState
 ```python
@@ -59,7 +59,7 @@ class AppState:
     api_key_dialog_open: bool = False
 ```
 
-### Service APIs
+### APIs de Serviço
 
 #### ConversationClient
 
@@ -95,7 +95,7 @@ async def ListMessages(conversation_id: str) -> List[Message]:
     # Returns: List of Message objects
 ```
 
-### Component APIs
+### APIs de Componentes
 
 #### Chat Bubble
 ```python
@@ -127,7 +127,7 @@ def render_form(message: StateMessage, app_state: AppState):
     #   app_state: Current application state
 ```
 
-### Event Handlers
+### Manipuladores de Eventos
 
 #### Message Events
 ```python
@@ -153,40 +153,40 @@ def navigate_to_conversation(conversation_id: str):
     """Navigate to a specific conversation"""
 ```
 
-### JSON-RPC Endpoints
+### Endpoints JSON-RPC
 
-#### Message Operations
+#### Operações de Mensagens
 ```
 POST /message/send
 POST /message/list
 POST /message/pending
 ```
 
-#### Conversation Operations
+#### Operações de Conversa
 ```
 POST /conversation/create
 POST /conversation/list
 ```
 
-#### Task Operations
+#### Operações de Tarefa
 ```
 POST /task/list
 ```
 
-#### Agent Operations
+#### Operações de Agente
 ```
 POST /agent/register
 POST /agent/list
 ```
 
-#### Event Operations
+#### Operações de Evento
 ```
 POST /events/get
 ```
 
-### Response Formats
+### Formatos de Resposta
 
-#### Success Response
+#### Resposta de Sucesso
 ```json
 {
     "jsonrpc": "2.0",
@@ -197,7 +197,7 @@ POST /events/get
 }
 ```
 
-#### Error Response
+#### Resposta de Erro
 ```json
 {
     "jsonrpc": "2.0",
@@ -210,14 +210,14 @@ POST /events/get
 }
 ```
 
-### WebSocket Events (Future)
+### Eventos WebSocket (Futuro)
 
-#### Connection
+#### Conexão
 ```javascript
 ws://localhost:8888/ws
 ```
 
-#### Message Format
+#### Formato de Mensagem
 ```json
 {
     "type": "message|typing|status",
@@ -225,35 +225,35 @@ ws://localhost:8888/ws
 }
 ```
 
-### Environment Variables
+### Variáveis de Ambiente
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GOOGLE_API_KEY` | Google AI API key | Required |
-| `A2A_UI_PORT` | UI server port | 8888 |
-| `MESOP_DEFAULT_PORT` | Mesop framework port | 8888 |
-| `USE_VERTEX_AI` | Use Vertex AI instead | false |
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `GOOGLE_API_KEY` | Chave da API do Google AI | Obrigatória |
+| `A2A_UI_PORT` | Porta do servidor da UI | 8888 |
+| `MESOP_DEFAULT_PORT` | Porta do framework Mesop | 8888 |
+| `USE_VERTEX_AI` | Usar Vertex AI | false |
 
-### Error Codes
+### Códigos de Erro
 
-| Code | Description |
-|------|-------------|
-| -32700 | Parse error |
-| -32600 | Invalid request |
-| -32601 | Method not found |
-| -32602 | Invalid params |
-| -32603 | Internal error |
-| -32000 | Server error |
+| Código | Descrição |
+|--------|-----------|
+| -32700 | Erro de parsing |
+| -32600 | Requisição inválida |
+| -32601 | Método não encontrado |
+| -32602 | Parâmetros inválidos |
+| -32603 | Erro interno |
+| -32000 | Erro no servidor |
 
-### Rate Limits
+### Limites de Taxa
 
-- Messages: 100/minute per conversation
-- Conversations: 10/minute per session
-- File uploads: 10MB max size
+- Mensagens: 100/minuto por conversa
+- Conversas: 10/minuto por sessão
+- Upload de arquivos: tamanho máximo 10MB
 
-### Authentication
+### Autenticação
 
-Currently using API key authentication via environment variables. Future versions will support:
+Atualmente usando autenticação por API key via variáveis de ambiente. Versões futuras terão suporte a:
 - OAuth 2.0
-- JWT tokens
-- Session-based auth
+- Tokens JWT
+- Autenticação baseada em sessão

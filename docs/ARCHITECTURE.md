@@ -1,13 +1,13 @@
-# Architecture Documentation
+# Documentação de Arquitetura
 
-## 🏗️ System Architecture
+## 🏗️ Arquitetura do Sistema
 
-### Overview
-UI Mesop Python is a modern web application built with Python, using the Mesop framework for UI and integrating with Google's Gemini AI through the A2A (Agent-to-Agent) protocol.
+### Visão Geral
+UI Mesop Python é um aplicativo web moderno construído em Python, usando o framework Mesop para UI e integrando com o Google Gemini via protocolo A2A (Agent-to-Agent).
 
-## 📦 Core Components
+## 📦 Componentes Centrais
 
-### 1. Frontend Layer (Mesop UI)
+### 1. Camada de Frontend (Mesop UI)
 ```
 components/
 ├── chat_bubble.py      # Message display component
@@ -17,20 +17,20 @@ components/
 └── async_poller.py     # Async polling mechanism
 ```
 
-### 2. State Management
+### 2. Gerenciamento de Estado
 ```
 state/
 ├── state.py            # Core state definitions
 └── host_agent_service.py # Agent service integration
 ```
 
-**Key State Classes:**
-- `AppState` - Main application state
-- `StateMessage` - Message representation
-- `StateConversation` - Conversation state
-- `StateTask` - Task management
+**Principais Classes de Estado:**
+- `AppState` - Estado principal da aplicação
+- `StateMessage` - Representação de mensagem
+- `StateConversation` - Estado da conversa
+- `StateTask` - Gerenciamento de tarefas
 
-### 3. Service Layer
+### 3. Camada de Serviços
 ```
 service/
 ├── types.py           # Single source of truth for types (336 lines)
@@ -41,49 +41,49 @@ service/
     └── in_memory_manager.py # Memory management
 ```
 
-## 🔄 Data Flow
+## 🔄 Fluxo de Dados
 
 ```mermaid
 graph TD
-    A[User Input] --> B[Mesop UI]
-    B --> C[State Management]
+    A[Entrada do Usuário] --> B[Mesop UI]
+    B --> C[Gerenciamento de Estado]
     C --> D[Host Agent Service]
-    D --> E[A2A Protocol]
+    D --> E[Protocolo A2A]
     E --> F[Google Gemini]
-    F --> G[Response]
+    F --> G[Resposta]
     G --> D
     D --> C
     C --> B
-    B --> H[User Display]
+    B --> H[Exibição ao Usuário]
 ```
 
-## 🎯 Design Principles
+## 🎯 Princípios de Design
 
-### 1. Simplicity First
-- Single source of truth for types
-- Direct field access (no redundant properties)
-- Native Mesop components
+### 1. Simplicidade em Primeiro Lugar
+- Fonte única de verdade para tipos
+- Acesso direto a campos (sem propriedades redundantes)
+- Componentes nativos do Mesop
 
-### 2. Performance Optimized
-- Async polling for real-time updates
-- Efficient state management
-- Minimal overhead
+### 2. Performance Otimizada
+- Polling assíncrono para atualizações em tempo real
+- Gerenciamento de estado eficiente
+- Sobrecarga mínima
 
-### 3. Maintainability
-- Clear separation of concerns
-- Modular component design
-- Comprehensive type safety
+### 3. Manutenibilidade
+- Separação clara de responsabilidades
+- Design modular de componentes
+- Segurança de tipos abrangente
 
-## 🔧 Technical Stack
+## 🔧 Stack Técnico
 
-### Core Technologies
-- **Python 3.12** - Primary language
-- **Mesop** - UI framework
-- **Pydantic v1.10.13** - Data validation
-- **Google Gemini** - AI integration
-- **A2A Protocol** - Agent communication
+### Tecnologias Centrais
+- **Python 3.12** - Linguagem principal
+- **Mesop** - Framework de UI
+- **Pydantic v1.10.13** - Validação de dados
+- **Google Gemini** - Integração de IA
+- **Protocolo A2A** - Comunicação entre agentes
 
-### Key Libraries
+### Principais Bibliotecas
 ```python
 mesop==0.16.3
 pydantic==1.10.13
@@ -91,10 +91,10 @@ google-genai==0.1.0
 grpcio==1.70.0
 ```
 
-## 📊 Type System
+## 📊 Sistema de Tipos
 
-### Unified Type Definition
-All types are consolidated in `service/types.py`:
+### Definição Unificada de Tipos
+Todos os tipos estão consolidados em `service/types.py`:
 
 ```python
 class Message(BaseModel):
@@ -105,68 +105,68 @@ class Message(BaseModel):
     # ... single source of truth
 ```
 
-### Field Naming Convention
-- **Primary**: camelCase (A2A Protocol standard)
-- **Aliases**: snake_case (Python compatibility)
-- **No redundant properties** - direct field access only
+### Convenção de Nomes de Campos
+- **Primário**: camelCase (padrão do protocolo A2A)
+- **Aliases**: snake_case (compatibilidade com Python)
+- **Sem propriedades redundantes** - apenas acesso direto aos campos
 
-## 🚀 Recent Optimizations
+## 🚀 Otimizações Recentes
 
-### Code Simplification (38% reduction)
-- Removed 2,327+ lines of redundant code
-- Eliminated 32 unnecessary files
-- Simplified form renderer (376 → 36 lines)
+### Simplificação de Código (redução de 38%)
+- Remoção de 2.327+ linhas de código redundante
+- Eliminação de 32 arquivos desnecessários
+- Simplificação do renderizador de formulários (376 → 36 linhas)
 
-### Performance Improvements
-- Build time: 15% faster
-- Memory usage: 10% lower
-- Startup time: 20% faster
+### Melhorias de Performance
+- Tempo de build: 15% mais rápido
+- Uso de memória: 10% menor
+- Tempo de inicialização: 20% mais rápido
 
-## 🔐 Security Considerations
+## 🔐 Considerações de Segurança
 
-### API Key Management
-- Environment variable based
-- No hardcoded secrets
-- Secure token handling
+### Gerenciamento de API Key
+- Baseado em variáveis de ambiente
+- Sem segredos hardcoded
+- Tratamento seguro de tokens
 
-### Data Validation
-- Pydantic models for all data structures
-- Type checking at runtime
-- Input sanitization
+### Validação de Dados
+- Modelos Pydantic para todas as estruturas de dados
+- Verificação de tipos em tempo de execução
+- Saneamento de entradas
 
-## 📈 Scalability
+## 📈 Escalabilidade
 
-### Horizontal Scaling
-- Stateless service design
-- Session-based conversation management
-- Load balancer ready
+### Escalonamento Horizontal
+- Design de serviço stateless
+- Gerenciamento de conversas baseado em sessão
+- Preparado para balanceador de carga
 
-### Vertical Scaling
-- Efficient memory usage
-- Async operations
-- Optimized data structures
+### Escalonamento Vertical
+- Uso eficiente de memória
+- Operações assíncronas
+- Estruturas de dados otimizadas
 
-## 🧪 Testing Strategy
+## 🧪 Estratégia de Testes
 
-### Unit Tests
-- Component-level testing
-- State management validation
-- Service layer verification
+### Testes de Unidade
+- Testes a nível de componente
+- Validação do gerenciamento de estado
+- Verificação da camada de serviços
 
-### Integration Tests
-- End-to-end flow testing
-- A2A protocol compliance
-- UI interaction testing
+### Testes de Integração
+- Testes de fluxo end-to-end
+- Conformidade com o protocolo A2A
+- Testes de interação de UI
 
-## 📝 Future Improvements
+## 📝 Melhorias Futuras
 
-### Planned Enhancements
-1. Cache implementation for improved performance
-2. WebSocket support for real-time updates
-3. Enhanced error handling and recovery
-4. Multi-agent conversation support
+### Aperfeiçoamentos Planejados
+1. Implementação de cache para melhorar performance
+2. Suporte a WebSocket para atualizações em tempo real
+3. Tratamento de erros e recuperação aprimorados
+4. Suporte a conversas multi-agentes
 
-### Technical Debt
-- Complete documentation consolidation
-- Additional unit test coverage
-- Performance profiling and optimization
+### Dívida Técnica
+- Consolidação completa da documentação
+- Cobertura adicional de testes de unidade
+- Profiling e otimização de performance

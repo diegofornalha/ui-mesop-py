@@ -1,42 +1,42 @@
 FROM registry.access.redhat.com/ubi8/python-312
 
-# Set work directory
+# Definir diretório de trabalho
 WORKDIR /ui-mesop-py
 
-# Copy Python Project Files (Container context must be the `python` directory)
+# Copiar arquivos do projeto Python (o contexto do container deve ser o diretório `python`)
 COPY ../.. /opt/app-root
 
 USER root
 
-# Install system build dependencies and UV package manager
+# Instalar dependências de build do sistema e o gerenciador de pacotes UV
 RUN dnf -y update && dnf install -y gcc gcc-c++ \
  && pip install uv
 
-# Set environment variables for uv:
-# UV_COMPILE_BYTECODE=1: Compiles Python files to .pyc for faster startup
-# UV_LINK_MODE=copy: Ensures files are copied, not symlinked, which can avoid issues
+# Definir variáveis de ambiente para o uv:
+# UV_COMPILE_BYTECODE=1: compila arquivos Python para .pyc para inicialização mais rápida
+# UV_LINK_MODE=copy: garante cópia de arquivos (não symlink), evitando problemas
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
-# Install dependencies using uv sync.
-# --frozen: Ensures uv respects the uv.lock file
-# --no-install-project: Prevents installing the project itself in this stage
-# --no-dev: Excludes development dependencies
-# --mount=type=cache: Leverages Docker's build cache for uv, speeding up repeated builds
+# Instalar dependências usando uv sync.
+# --frozen: garante que o uv respeite o arquivo uv.lock
+# --no-install-project: evita instalar o próprio projeto nesta etapa
+# --no-dev: exclui dependências de desenvolvimento
+# --mount=type=cache: aproveita o cache de build do Docker para o uv, acelerando builds repetidos
 RUN --mount=type=cache,target=/.cache/uv \
     uv sync --frozen --no-install-project --no-dev
 
-# Install the project
+# Instalar o projeto
 RUN --mount=type=cache,target=/.cache/uv \
     uv sync --frozen --no-dev
 
-# Allow non-root user to access the everything in app-root
+# Permitir que usuário não-root acesse tudo em app-root
 RUN chgrp -R root /opt/app-root/ && chmod -R g+rwx /opt/app-root/
 
-# Expose default port (change if needed)
+# Expor porta padrão (alterar se necessário)
 EXPOSE 8888
 
 USER 1001
 
-# Run the agent
+# Executar o agente
 CMD ["uv", "run", "main.py", "--host", "0.0.0.0"]

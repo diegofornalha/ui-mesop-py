@@ -1,16 +1,16 @@
-# Implementation Guide
+# Guia de Implementação
 
-## 🚀 Implementation Details and Patterns
+## 🚀 Detalhes e Padrões de Implementação
 
-### Coding Standards
+### Padrões de Código
 
-#### Python Style Guide
-- Follow PEP 8 conventions
-- Use type hints for all functions
-- Maximum line length: 100 characters
-- Use descriptive variable names
+#### Guia de Estilo Python
+- Siga as convenções do PEP 8
+- Use type hints em todas as funções
+- Comprimento máximo de linha: 100 caracteres
+- Use nomes de variáveis descritivos
 
-#### Naming Conventions
+#### Convenções de Nomenclatura
 ```python
 # Classes: PascalCase
 class StateMessage:
@@ -28,10 +28,10 @@ def _internal_helper():
     pass
 ```
 
-### Type System Implementation
+### Implementação do Sistema de Tipos
 
-#### Single Source of Truth
-All types are defined in `service/types.py`:
+#### Fonte Única de Verdade
+Todos os tipos são definidos em `service/types.py`:
 
 ```python
 # ✅ CORRECT - Direct field access
@@ -43,8 +43,8 @@ message.message_id_python  # Don't use
 message.messageid_python   # Don't use
 ```
 
-#### Field Aliases
-Use Pydantic aliases for compatibility:
+#### Aliases de Campos
+Use aliases do Pydantic para compatibilidade:
 
 ```python
 class Message(BaseModel):
@@ -52,9 +52,9 @@ class Message(BaseModel):
     # Accepts both: messageId and message_id
 ```
 
-### Component Development
+### Desenvolvimento de Componentes
 
-#### Creating a New Component
+#### Criando um Novo Componente
 ```python
 import mesop as me
 from state.state import AppState
@@ -72,15 +72,15 @@ def my_component():
         me.text("Component content")
 ```
 
-#### Component Best Practices
-1. Use native Mesop components
-2. Keep components under 100 lines
-3. Separate logic from presentation
-4. Use state management properly
+#### Boas Práticas de Componentes
+1. Use componentes nativos do Mesop
+2. Mantenha componentes com menos de 100 linhas
+3. Separe lógica de apresentação
+4. Use o gerenciamento de estado corretamente
 
-### State Management Patterns
+### Padrões de Gerenciamento de Estado
 
-#### Accessing State
+#### Acessando o Estado
 ```python
 def my_handler(e: me.ClickEvent):
     state = me.state(AppState)
@@ -90,7 +90,7 @@ def my_handler(e: me.ClickEvent):
     state.current_conversation_id = "new-id"
 ```
 
-#### Async Operations
+#### Operações Assíncronas
 ```python
 async def async_handler(e: me.WebEvent):
     yield  # Initial yield for UI update
@@ -105,9 +105,9 @@ async def async_handler(e: me.WebEvent):
     yield  # Final yield to update UI
 ```
 
-### Message Handling
+### Manipulação de Mensagens
 
-#### Sending Messages
+#### Enviando Mensagens
 ```python
 async def send_message(message: str, message_id: str = ''):
     state = me.state(PageState)
@@ -132,7 +132,7 @@ async def send_message(message: str, message_id: str = ''):
     await SendMessage(request)
 ```
 
-#### Processing Responses
+#### Processando Respostas
 ```python
 async def refresh_messages():
     page_state = me.state(PageState)
@@ -155,9 +155,9 @@ async def refresh_messages():
         print(f"Error updating messages: {e}")
 ```
 
-### Form Rendering (Simplified)
+### Renderização de Formulários (Simplificada)
 
-#### Native Mesop Forms
+#### Formulários Nativos do Mesop
 ```python
 def render_form(message: StateMessage, app_state: AppState):
     """Render form using native Mesop components"""
@@ -180,9 +180,9 @@ def render_form(message: StateMessage, app_state: AppState):
             # Add form fields as needed
 ```
 
-### Error Handling
+### Tratamento de Erros
 
-#### Standard Error Pattern
+#### Padrão de Erro Padrão
 ```python
 try:
     result = await risky_operation()
@@ -197,7 +197,7 @@ finally:
     pass
 ```
 
-#### User-Friendly Errors
+#### Erros Amigáveis ao Usuário
 ```python
 def show_error(message: str):
     with me.box(style=me.Style(
@@ -209,9 +209,9 @@ def show_error(message: str):
         me.text(f"Error: {message}")
 ```
 
-### Performance Optimization
+### Otimização de Performance
 
-#### Async Polling
+#### Polling Assíncrono
 ```python
 async_poller(
     trigger_event=poll_messages,
@@ -222,7 +222,7 @@ async_poller(
 )
 ```
 
-#### Efficient State Updates
+#### Atualizações de Estado Eficientes
 ```python
 # ✅ GOOD - Update only when needed
 if len(new_messages) > len(app_state.messages):
@@ -232,9 +232,9 @@ if len(new_messages) > len(app_state.messages):
 app_state.messages = new_messages
 ```
 
-### Testing Patterns
+### Padrões de Testes
 
-#### Unit Test Structure
+#### Estrutura de Testes de Unidade
 ```python
 def test_message_creation():
     """Test message creation with various inputs"""
@@ -246,7 +246,7 @@ def test_message_creation():
     assert msg.content == "Test content"
 ```
 
-#### Integration Test Pattern
+#### Padrão de Teste de Integração
 ```python
 async def test_send_message_flow():
     """Test complete message send flow"""
@@ -264,9 +264,9 @@ async def test_send_message_flow():
     assert response.messageId is not None
 ```
 
-### Debugging Tips
+### Dicas de Depuração
 
-#### Debug Logging
+#### Logs de Depuração
 ```python
 import logging
 
@@ -278,7 +278,7 @@ def debug_function():
     logger.debug(f"Exiting function with result: {result}")
 ```
 
-#### State Inspection
+#### Inspeção de Estado
 ```python
 # Print entire state for debugging
 print(f"Current state: {app_state.__dict__}")
@@ -288,25 +288,25 @@ print(f"Messages: {len(app_state.messages)}")
 print(f"Conversations: {app_state.conversations}")
 ```
 
-### Common Pitfalls
+### Armadilhas Comuns
 
-#### ❌ Avoid These
-1. Using redundant properties (`message.message_id_python`)
-2. Creating unnecessary state classes
-3. Over-engineering simple components
-4. Ignoring async/await patterns
-5. Not handling errors properly
+#### ❌ Evite Isto
+1. Usar propriedades redundantes (`message.message_id_python`)
+2. Criar classes de estado desnecessárias
+3. Superengenharia em componentes simples
+4. Ignorar padrões async/await
+5. Não tratar erros adequadamente
 
-#### ✅ Do These Instead
-1. Use direct field access (`message.messageId`)
-2. Use existing state classes
-3. Keep components simple and focused
-4. Properly use async/await
-5. Implement comprehensive error handling
+#### ✅ Faça Isto em Vez Disso
+1. Use acesso direto aos campos (`message.messageId`)
+2. Use classes de estado existentes
+3. Mantenha os componentes simples e focados
+4. Use corretamente async/await
+5. Implemente tratamento de erros abrangente
 
-### Migration Guide
+### Guia de Migração
 
-#### From Old Pattern to New
+#### Do Padrão Antigo para o Novo
 ```python
 # OLD (removed)
 message.message_id_python
@@ -320,25 +320,25 @@ message_dict = message.dict(by_alias=True)
 message_dict['message_id']  # snake_case version
 ```
 
-### Deployment Checklist
+### Checklist de Deploy
 
-- [ ] Environment variables set
-- [ ] Dependencies installed
-- [ ] Tests passing
-- [ ] Port configuration correct
-- [ ] API keys configured
-- [ ] Logging configured
-- [ ] Error handling in place
+- [ ] Variáveis de ambiente definidas
+- [ ] Dependências instaladas
+- [ ] Testes passando
+- [ ] Configuração de porta correta
+- [ ] API keys configuradas
+- [ ] Logging configurado
+- [ ] Tratamento de erros implementado
 
-### Performance Monitoring
+### Monitoramento de Performance
 
-#### Key Metrics
-- Response time < 200ms
-- Memory usage < 500MB
-- CPU usage < 50%
-- Message throughput > 100/min
+#### Métricas-Chave
+- Tempo de resposta < 200ms
+- Uso de memória < 500MB
+- Uso de CPU < 50%
+- Vazão de mensagens > 100/min
 
-#### Monitoring Commands
+#### Comandos de Monitoramento
 ```bash
 # Check memory usage
 ps aux | grep python
