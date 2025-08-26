@@ -6,12 +6,23 @@ Implementa pensamento e ação como um agente real, não apenas LLM.
 import asyncio
 import uuid
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, AsyncGenerator
 from dataclasses import dataclass, field
+from enum import Enum
 
 from .claude_client import ClaudeClientV10
 
 logger = logging.getLogger(__name__)
+
+
+class AgentState(Enum):
+    """Estados do ciclo de execução do agente."""
+    OBSERVING = "observing"
+    THINKING = "thinking"  
+    DECIDING = "deciding"
+    ACTING = "acting"
+    WAITING = "waiting"
+    COMPLETED = "completed"
 
 
 @dataclass 
@@ -32,6 +43,9 @@ class ClaudeA2AAgent:
     _initialized: bool = False
     _memory: Dict[str, Any] = field(default_factory=dict)
     _tools: Dict[str, callable] = field(default_factory=dict)
+    _state: AgentState = AgentState.WAITING
+    _current_context: Dict[str, Any] = field(default_factory=dict)
+    _pending_events: List[Dict[str, Any]] = field(default_factory=list)
     
     async def initialize(self):
         """Inicializa o agente A2A."""
@@ -166,6 +180,105 @@ class ClaudeA2AAgent:
         self._tools.clear()
         self._initialized = False
         logger.info(f"✅ {self.name} fechado")
+
+    
+    async def run_iteration(self, input_data: str = None, session_id: str = None) -> AsyncGenerator[Dict[str, Any], None]:
+        """
+        Executa uma iteração completa do ciclo do agente.
+        Implementa o padrão do ADK: observar → pensar → decidir → agir → yield evento.
+        """
+        await self.initialize()
+        
+        # 1. OBSERVAR - Observa o estado atual e entrada
+        self._state = AgentState.OBSERVING
+        logger.info(f"🔍 [ITERATION] Estado: OBSERVANDO")
+        
+        observation = {
+            "input": input_data,
+            "session_id": session_id,
+            "memory": self._memory.copy(),
+            "timestamp": str(uuid.uuid4())
+        }
+        
+        # YIELD: Evento de observação
+        yield self.yield_event("observation", observation)
+        
+        # 2. PENSAR - Usa LLM para processar observação
+        self._state = AgentState.THINKING
+        logger.info(f"🤔 [ITERATION] Estado: PENSANDO")
+        
+        thought = await self._understand(input_data or "", session_id or "")
+        
+        # YIELD: Evento de pensamento
+        yield self.yield_event("thought", thought)
+        
+        # 3. DECIDIR - Decide ação baseada no pensamento
+        self._state = AgentState.DECIDING
+        logger.info(f"⚖️ [ITERATION] Estado: DECIDINDO")
+        
+        decision = await self._plan_action(thought, session_id or "")
+        
+        # YIELD: Evento de decisão
+        yield self.yield_event("decision", decision)
+        
+        # 4. AGIR - Executa a ação decidida
+        self._state = AgentState.ACTING
+        logger.info(f"🎬 [ITERATION] Estado: AGINDO")
+        
+        action_result = await self._execute_action(decision, session_id or "")
+        
+        # YIELD: Evento de ação
+        yield self.yield_event("action", action_result)
+        
+        # 5. FINALIZAR - Prepara resposta final
+        self._state = AgentState.COMPLETED
+        logger.info(f"✅ [ITERATION] Estado: COMPLETO")
+        
+        final_response = await self._formulate_response(action_result, session_id or "")
+        
+        # YIELD: Evento de conclusão
+        yield self.yield_event("completion", {
+            "response": final_response,
+            "state": "completed",
+            "session_id": session_id
+        })
+        
+        # Resetar estado
+        self._state = AgentState.WAITING
+    
+    def yield_event(self, event_type: str, data: Any) -> Dict[str, Any]:
+        """
+        Cria e retorna um evento para ser yielded.
+        Implementa o padrão de eventos do ADK.
+        """
+        event = {
+            "type": f"agent_{event_type}",
+            "agent": self.name,
+            "state": self._state.value,
+            "data": data,
+            "timestamp": str(uuid.uuid4())
+        }
+        
+        # Adicionar à lista de eventos pendentes
+        self._pending_events.append(event)
+        
+        logger.info(f"📤 [EVENT] Yielding: {event['type']}")
+        return event
+    
+    async def process_until_yield(self) -> Optional[Dict[str, Any]]:
+        """
+        Processa até o próximo yield de evento.
+        Útil para processamento step-by-step.
+        """
+        if self._pending_events:
+            return self._pending_events.pop(0)
+        return None
+    
+    async def resume(self):
+        """
+        Retoma o processamento após um yield.
+        """
+        logger.info(f"▶️ [RESUME] Retomando do estado: {self._state.value}")
 
 
 # Teste do agente

@@ -109,6 +109,7 @@ class Task(BaseModel):
     title: str
     description: str = ""
     status: str = "pending"
+    contextId: str = ""  # Adicionar campo para compatibilidade
 
 
 # ========== CLASSES JSON-RPC ==========

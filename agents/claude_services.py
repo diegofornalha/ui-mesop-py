@@ -126,6 +126,24 @@ class ClaudeSessionService:
         self._lock = asyncio.Lock()
         logger.info("ClaudeSessionService inicializado")
     
+    async def update_session_state(self, session_id: str, state: Dict[str, Any]) -> bool:
+        """
+        Atualiza o estado de uma sessão.
+        
+        Args:
+            session_id: ID da sessão
+            state: Novo estado
+            
+        Returns:
+            True se sucesso
+        """
+        async with self._lock:
+            if session_id in self._sessions:
+                self._sessions[session_id]["state"] = state
+                self._sessions[session_id]["updated_at"] = datetime.now().isoformat()
+                return True
+            return False
+    
     async def initialize(self):
         """Inicialização assíncrona (se necessário)."""
         logger.info("SessionService pronto")
@@ -187,7 +205,7 @@ class ClaudeSessionService:
         async with self._lock:
             return list(self._sessions.keys())
     
-    async def append_event(self, session_id: str, event: Union[ClaudeEvent, Dict]) -> bool:
+    async def append_event(self, session_id: str, event: Any) -> bool:
         """
         Adiciona evento a uma sessão (compatível com ADK append_event).
         
@@ -203,9 +221,28 @@ class ClaudeSessionService:
                 logger.warning(f"Sessão não encontrada: {session_id}")
                 return False
             
-            # Converter dict para ClaudeEvent se necessário
+            # Aceitar qualquer tipo de evento (Event, ClaudeEvent, dict)
+            # Para compatibilidade com nova arquitetura ADK
             if isinstance(event, dict):
                 event = ClaudeEvent(**event)
+            elif not isinstance(event, ClaudeEvent):
+                # Se for Event do ADK ou outro tipo, converter
+                if hasattr(event, 'to_dict'):
+                    event_dict = event.to_dict()
+                    event = ClaudeEvent(
+                        id=getattr(event, 'id', str(uuid.uuid4())),
+                        type=getattr(event, 'type', 'event'),
+                        session_id=session_id,
+                        content=getattr(event, 'content', None),
+                        author=getattr(event, 'author', 'system')
+                    )
+                else:
+                    # Fallback - criar evento genérico
+                    event = ClaudeEvent(
+                        type='generic',
+                        session_id=session_id,
+                        content=str(event)
+                    )
             
             # Adicionar aos eventos
             if session_id not in self._events:

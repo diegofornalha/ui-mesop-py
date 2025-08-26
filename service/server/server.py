@@ -87,36 +87,63 @@ class ConversationServer:
         message_data = await request.json()
         message = Message(**message_data['params'])
         message = self.manager.sanitize_message(message)
-        loop = asyncio.get_event_loop()
-        
-        # Import para verificar tipo
-        from .claude_adk_host_manager import ClaudeADKHostManager
         
         print(f"🔍 [SEND_MESSAGE] Manager type: {type(self.manager).__name__}")
         print(f"   Message ID: {message.messageId[:8]}...")
         print(f"   Context ID: {message.contextId[:8]}...")
         
-        if isinstance(self.manager, ClaudeADKHostManager):
-            # Ambos têm process_message_threadsafe
-            print(f"✅ Usando process_message_threadsafe")
-            t = threading.Thread(
-                target=lambda: self.manager.process_message_threadsafe(message, loop)
-            )
-        else:
-            print(f"⚠️ Usando asyncio.run diretamente")
-            t = threading.Thread(
-                target=lambda: asyncio.run(
-                    self.manager.process_message(message)
-                )
-            )
-        t.start()
-        print(f"🚀 Thread iniciada para processar mensagem")
+        # Processar mensagem de forma assíncrona
+        # Usar create_task para não bloquear mas garantir execução
+        task = asyncio.create_task(self._process_message_async(message))
+        
+        # Aguardar um pouco para garantir que começou
+        await asyncio.sleep(0.1)
+        
+        print(f"✅ Mensagem sendo processada em background")
+        
         return SendMessageResponse(
             result=MessageInfo(
                 messageid=message.messageId,
                 contextid=message.contextId if message.contextId else '',
             )
         )
+    
+    async def _process_message_async(self, message: Message):
+        """Processa mensagem de forma assíncrona em background."""
+        try:
+            print(f"🔄 [ASYNC] Processando mensagem {message.messageId[:8]}...")
+            print(f"   [ASYNC] Manager: {type(self.manager).__name__}")
+            print(f"   [ASYNC] Tem process_message? {hasattr(self.manager, 'process_message')}")
+            
+            # Verificar se é ClaudeADKHostManager
+            from .claude_adk_host_manager import ClaudeADKHostManager
+            if isinstance(self.manager, ClaudeADKHostManager):
+                print(f"   [ASYNC] É ClaudeADKHostManager, chamando process_message...")
+                result = await self.manager.process_message(message)
+                print(f"   [ASYNC] Resultado retornado: {result}")
+                
+                # Verificar se a mensagem foi salva
+                if hasattr(result, 'contextId') and result.contextId:
+                    conv = self.manager.get_conversation(result.contextId)
+                    if conv:
+                        print(f"   [ASYNC] Conversa tem {len(conv.messages)} mensagens")
+                        # Verificar última mensagem
+                        if conv.messages:
+                            last_msg = conv.messages[-1]
+                            print(f"   [ASYNC] Última mensagem: role={getattr(last_msg, 'role', 'NO_ROLE')}")
+                            if hasattr(last_msg, 'parts') and last_msg.parts:
+                                content_preview = str(last_msg.parts[0])[:50] if last_msg.parts else "SEM_CONTEUDO"
+                                print(f"   [ASYNC] Preview: {content_preview}...")
+            else:
+                print(f"   [ASYNC] Manager tipo: {type(self.manager)}")
+            
+            print(f"✅ [ASYNC] Mensagem processada com sucesso")
+            return True  # Retornar sucesso
+        except Exception as e:
+            print(f"❌ [ASYNC] Erro ao processar mensagem: {e}")
+            import traceback
+            traceback.print_exc()
+            return False  # Retornar falha
 
     async def _list_messages(self, request: Request):
         message_data = await request.json()
@@ -129,14 +156,23 @@ class ConversationServer:
                 role = getattr(msg, 'role', 'NO_ROLE')
                 print(f"   [SERVER] Msg {i}: role={role}, type={type(role)}")
             
-            cached_messages = self.cache_content(messages)
+            # Converter mensagens a2a para formato compatível
+            from .message_converter import convert_messages_for_api
+            converted_messages = convert_messages_for_api(messages)
             
-            print(f"📤 [SERVER] Retornando mensagens após cache:")
-            for i, msg in enumerate(cached_messages):
-                role = getattr(msg, 'role', 'NO_ROLE')
-                print(f"   [CACHED] Msg {i}: role={role}")
+            # PATCH: Garantir messageId e preparar para UI
+            for msg_dict in converted_messages:
+                # Garantir que messageId existe
+                if not msg_dict.get('messageId'):
+                    import uuid
+                    msg_dict['messageId'] = str(uuid.uuid4())
+                
+                # NÃO adicionar content aqui - será processado pela UI via extract_content
+                # O campo content no modelo Message é string, não lista!
             
-            return ListMessageResponse(result=cached_messages)
+            print(f"📤 [SERVER] Retornando {len(converted_messages)} mensagens convertidas")
+            
+            return ListMessageResponse(result=converted_messages)
         return ListMessageResponse(result=[])
 
     def cache_content(self, messages: list[Message]):
@@ -199,9 +235,16 @@ class ConversationServer:
         return GetEventResponse(result=self.manager.events)
 
     def _list_tasks(self):
-        # Por enquanto, retornar lista vazia para evitar erro de validação
-        # TODO: Converter dataclass Task para Pydantic Task
-        return ListTaskResponse(result=[])
+        # Usar ClaudeTaskManager para obter tasks convertidas
+        from .claude_adk_host_manager import ClaudeADKHostManager
+        
+        if isinstance(self.manager, ClaudeADKHostManager):
+            # Obter tasks Service do gerenciador
+            service_tasks = self.manager.task_manager.get_service_tasks()
+            return ListTaskResponse(result=service_tasks)
+        else:
+            # Fallback para outros managers
+            return ListTaskResponse(result=[])
 
     async def _register_agent(self, request: Request):
         message_data = await request.json()

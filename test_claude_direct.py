@@ -1,57 +1,52 @@
 #!/usr/bin/env python3
 """
-Teste direto do Claude Code SDK para verificar se está funcionando.
+Teste direto do Claude SDK.
 """
 
 import asyncio
-import logging
-from claude_code_sdk import query, ClaudeCodeOptions
+import sys
+from pathlib import Path
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+# Adicionar SDK ao path
+SDK_PATH = Path("/home/codable/terminal/claude-code-sdk-python/src")
+sys.path.insert(0, str(SDK_PATH))
 
-async def test_claude_sdk():
-    """Testa o Claude SDK diretamente."""
-    print("🧪 Testando Claude Code SDK diretamente...")
+from claude_code_sdk import query
+from claude_code_sdk.client import ClaudeSDKClient
+from claude_code_sdk.types import Message
+
+async def test_claude_direct():
+    """Testa comunicação direta com Claude."""
+    print("🔧 Testando Claude SDK direto...")
     
     try:
-        # Configurar opções
-        options = ClaudeCodeOptions(
-            system_prompt="Você é um assistente útil. Responda de forma breve.",
-            max_thinking_tokens=1000
-        )
+        # Teste 1: Query simples
+        print("\n📝 Teste 1: Query simples")
+        async for message in query(prompt="Olá! Responda apenas: 'SDK funcionando!'"):
+            print(f"✅ Resposta: {message}")
+            break
         
-        print("📤 Enviando prompt: 'Responda apenas: TESTE OK'")
-        
-        # Query Claude
-        response_text = ""
-        async for message in query(
-            prompt="Responda apenas: TESTE OK",
-            options=options
-        ):
-            print(f"   Tipo da mensagem: {type(message)}")
-            print(f"   Conteúdo: {message}")
+        # Teste 2: Sessão interativa
+        print("\n📝 Teste 2: Sessão com ClaudeSDKClient")
+        async with ClaudeSDKClient() as client:
+            # Enviar mensagem
+            await client.query("Quanto é 2+2? Responda apenas o número.")
             
-            # Verificar diferentes tipos de mensagem
-            if hasattr(message, 'content'):
-                response_text += str(message.content)
-                print(f"   Extraído: {message.content}")
+            # Receber resposta
+            async for message in client.receive_messages():
+                if message:
+                    print(f"✅ Mensagem recebida: {message}")
+                    break
         
-        print(f"\n✅ Resposta completa: {response_text}")
+        print("\n✅ Todos os testes passaram!")
+        return True
         
-        if response_text:
-            print("✅ Claude SDK está funcionando!")
-            return True
-        else:
-            print("❌ Claude SDK não retornou resposta")
-            return False
-            
     except Exception as e:
-        print(f"❌ Erro ao testar Claude SDK: {e}")
+        print(f"\n❌ Erro nos testes: {e}")
         import traceback
-        print(traceback.format_exc())
+        traceback.print_exc()
         return False
 
 if __name__ == "__main__":
-    result = asyncio.run(test_claude_sdk())
-    exit(0 if result else 1)
+    result = asyncio.run(test_claude_direct())
+    sys.exit(0 if result else 1)

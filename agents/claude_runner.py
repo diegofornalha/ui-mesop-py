@@ -6,7 +6,7 @@ Fornece a mesma interface e funcionalidades que o Google ADK Runner.
 import asyncio
 import uuid
 import logging
-from typing import Any, Dict, Optional, Callable, List
+from typing import Any, Dict, Optional, Callable, List, AsyncGenerator
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -70,18 +70,20 @@ class ClaudeRunner:
         """
         Executa o runner de forma síncrona (compatível com ADKRunner.run).
         """
-        return asyncio.run(self.run_async(input_data, session_id))
+        return asyncio.run(self.run_async_simple(input_data, session_id))
     
-    async def run_async(self, input_data: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+    async def run_async(self, input_data: str, session_id: Optional[str] = None) -> AsyncGenerator[Dict[str, Any], None]:
         """
-        Executa o runner de forma assíncrona (compatível com ADKRunner.run_async).
+        Executa o runner de forma assíncrona com yield/pause/resume (compatível com ADKRunner.run_async).
+        
+        Este é o método principal que implementa o padrão event-driven do ADK.
         
         Args:
             input_data: Dados de entrada (mensagem do usuário)
             session_id: ID da sessão (cria nova se None)
             
-        Returns:
-            Dict com resposta e metadados
+        Yields:
+            Dict com eventos durante o processamento
         """
         await self.initialize()
         
@@ -94,7 +96,16 @@ class ClaudeRunner:
             if not session:
                 session = await self.session_service.create_session(session_id)
         
-        # Registrar evento de entrada
+        # 1. YIELD: Evento de início de processamento
+        start_event = {
+            "type": "processing_start",
+            "session_id": session_id,
+            "message": "Iniciando processamento da mensagem"
+        }
+        logger.info(f"🎯 [RUNNER] Yielding start event: {start_event['type']}")
+        yield start_event
+        
+        # 2. Registrar evento de entrada
         input_event = ClaudeEvent.create(
             type="user_input",
             session_id=session_id,
@@ -102,10 +113,30 @@ class ClaudeRunner:
         )
         await self.session_service.append_event(session_id, input_event)
         
-        # Processar com Claude
+        # 3. YIELD: Evento de entrada registrada
+        input_registered_event = {
+            "type": "input_registered",
+            "session_id": session_id,
+            "event_id": input_event.id,
+            "content": input_data
+        }
+        logger.info(f"🎯 [RUNNER] Yielding input registered event")
+        yield input_registered_event
+        
+        # 4. Processar com Claude (aqui ocorre a "pausa" para pensar)
+        logger.info(f"🤔 [RUNNER] Processando com Claude...")
         response = await self._process_with_claude(input_data, session_id)
         
-        # Registrar evento de resposta
+        # 5. YIELD: Evento de resposta gerada
+        response_generated_event = {
+            "type": "response_generated",
+            "session_id": session_id,
+            "response": response
+        }
+        logger.info(f"🎯 [RUNNER] Yielding response generated event")
+        yield response_generated_event
+        
+        # 6. Registrar evento de resposta
         response_event = ClaudeEvent.create(
             type="agent_response",
             session_id=session_id,
@@ -113,17 +144,41 @@ class ClaudeRunner:
         )
         await self.session_service.append_event(session_id, response_event)
         
-        # Salvar na memória se configurado
+        # 7. Salvar na memória
         if self.memory_service:
             await self.memory_service.store(
                 key=f"response_{session_id}_{input_event.id}",
                 value=response
             )
         
-        return {
+        # 8. YIELD: Evento final com resultado completo
+        final_event = {
+            "type": "processing_complete",
             "session_id": session_id,
             "response": response,
             "events": [input_event.to_dict(), response_event.to_dict()]
+        }
+        logger.info(f"🎯 [RUNNER] Yielding final event: {final_event['type']}")
+        yield final_event
+    
+    async def run_async_simple(self, input_data: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Versão simplificada do run_async que retorna diretamente o resultado.
+        Útil para casos onde não é necessário o padrão event-driven.
+        
+        Returns:
+            Dict com resposta final e metadados
+        """
+        # Consumir o generator e retornar apenas o resultado final
+        final_result = None
+        async for event in self.run_async(input_data, session_id):
+            if event.get("type") == "processing_complete":
+                final_result = event
+        
+        return final_result or {
+            "session_id": session_id,
+            "response": "Erro ao processar",
+            "events": []
         }
     
     async def _process_with_claude(self, input_data: str, session_id: str) -> str:
@@ -209,8 +264,8 @@ class ClaudeRunner:
                     print("👋 Encerrando sessão...")
                     break
                 
-                # Processar
-                result = await self.run_async(user_input, session_id)
+                # Processar usando run_async_simple
+                result = await self.run_async_simple(user_input, session_id)
                 
                 # Exibir resposta
                 print(f"\n🤖 Claude: {result['response']}")

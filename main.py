@@ -21,7 +21,7 @@ from pages.event_list import event_list_page
 from pages.home import home_page_content
 from pages.settings import settings_page_content
 from pages.task_list import task_list_page
-from service.server.server import ConversationServer
+from service.server.server_v2 import ConversationServerV2 as ConversationServer
 from state import host_agent_service
 from state.state import AppState
 

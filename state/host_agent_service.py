@@ -268,31 +268,50 @@ def convert_task_to_state(task: Task) -> StateTask:
     # Get the first message as the description
     output = (
         [extract_content(a.parts) for a in task.artifacts]
-        if task.artifacts
+        if hasattr(task, 'artifacts') and task.artifacts
         else []
     )
-    if not task.history:
+    
+    # Extrair context_id com segurança
+    context_id = extract_conversation_id(task)
+    
+    # Verificar se history existe
+    history = getattr(task, 'history', None)
+    
+    if not history:
         return StateTask(
             taskId=task.id,
-            contextId=task.context_id,
+            contextId=context_id,
             state=TaskState.failed.name,
             message=StateMessage(
                 messageId=str(uuid.uuid4()),
-                contextId=task.context_id,
+                contextId=context_id,
                 taskId=task.id,
                 role='agent',  # Role.agent.name simplificado para evitar erro
                 content=[('No history', 'text')],
             ),
             artifacts=output,
         )
-    message = task.history[0]
-    last_message = task.history[-1]
+    
+    message = history[0]
+    last_message = history[-1]
     if last_message != message:
-        output = [extract_content(last_message.parts)] + output
+        # Verificar se last_message tem parts antes de acessar
+        if hasattr(last_message, 'parts'):
+            output = [extract_content(last_message.parts)] + output
+    
+    # Obter status com segurança
+    status_state = 'pending'
+    if hasattr(task, 'status') and task.status:
+        if hasattr(task.status, 'state'):
+            status_state = str(task.status.state)
+        elif isinstance(task.status, str):
+            status_state = task.status
+    
     return StateTask(
         taskId=task.id,
-        contextId=task.context_id,
-        state=str(task.status.state),
+        contextId=context_id,
+        state=status_state,
         message=convert_message_to_state(message),
         artifacts=output,
     )
@@ -341,6 +360,7 @@ def extract_content(
     parts: list[tuple[str | dict[str, Any], str]] = []
     if not message_parts:
         return []
+    
     for part in message_parts:
         # Handle both dict and object formats
         if isinstance(part, dict):
@@ -356,9 +376,17 @@ def extract_content(
         # Get kind attribute safely
         kind = p.get('kind') if isinstance(p, dict) else getattr(p, 'kind', None)
         
+        # Fallback para detectar TextPart quando kind não está presente
+        if hasattr(part, '__class__') and part.__class__.__name__ == 'TextPart':
+            text = getattr(part, 'text', '')
+            if text:
+                parts.append((text, 'text/plain'))
+                continue
+        
         if kind == 'text':
             text = p.get('text') if isinstance(p, dict) else getattr(p, 'text', '')
-            parts.append((text, 'text/plain'))
+            if text:  # Apenas adicionar se não vazio
+                parts.append((text, 'text/plain'))
         elif kind == 'file':
             file_obj = p.get('file') if isinstance(p, dict) else getattr(p, 'file', None)
             if file_obj and isinstance(file_obj, FileWithBytes):
@@ -377,6 +405,15 @@ def extract_content(
                 except Exception as e:
                     print('Failed to dump data', e)
                     parts.append(('<data>', 'text/plain'))
+        
+        # Fallback final para cada part individual
+        if not kind and not (hasattr(part, '__class__') and part.__class__.__name__ == 'TextPart'):
+            # Tentar extrair text diretamente
+            if hasattr(part, 'text'):
+                text = getattr(part, 'text', '')
+                if text:
+                    parts.append((text, 'text/plain'))
+    
     return parts
 
 
@@ -395,9 +432,16 @@ def extract_message_conversation(message: Message) -> str:
 
 
 def extract_conversation_id(task: Task) -> str:
-    if task.context_id:
+    # Tentar contextId primeiro (Pydantic), depois context_id (dataclass)
+    if hasattr(task, 'contextId') and task.contextId:
+        return task.contextId
+    if hasattr(task, 'context_id') and task.context_id:
         return task.context_id
     # Tries to find the first conversation id for the message in the task.
-    if task.status.message:
-        return task.status.message.context_id or ''
+    if hasattr(task, 'status') and task.status:
+        if hasattr(task.status, 'message') and task.status.message:
+            if hasattr(task.status.message, 'contextId'):
+                return task.status.message.contextId or ''
+            if hasattr(task.status.message, 'context_id'):
+                return task.status.message.context_id or ''
     return ''

@@ -61,6 +61,7 @@ from agents.claude_converters import (
 
 from service.server.application_manager import ApplicationManager
 from service.types import Conversation, Event
+from service.server.claude_task_manager import ClaudeTaskManager, get_task_manager
 
 logger = logging.getLogger(__name__)
 
@@ -96,11 +97,12 @@ class ClaudeADKHostManager(ApplicationManager):
         # Inicializar gerenciadores de callbacks e artifacts
         self.callback_manager = get_callback_manager()
         self.artifact_manager = get_artifact_manager()
+        self.task_manager = get_task_manager()  # Gerenciador de tasks com conversão
         
         # Estado interno
         self._conversations: Dict[str, Conversation] = {}
         self._messages: Dict[str, List[Message]] = {}
-        self._tasks: Dict[str, Task] = {}
+        self._tasks: Dict[str, Task] = {}  # Mantém tasks A2A originais
         self._events: List[Event] = []
         self._agents: List[AgentCard] = []
         self._pending_messages: Dict[str, str] = {}
@@ -196,8 +198,14 @@ class ClaudeADKHostManager(ApplicationManager):
         
         # Garantir que conversa existe
         if conversation_id not in self._conversations:
-            logger.info(f"⚠️ Conversa {conversation_id[:8]} não existe, criando...")
-            await self.create_conversation()
+            logger.info(f"⚠️ Conversa {conversation_id[:8]} não existe, criando com ID específico...")
+            # Criar conversa com o ID específico fornecido
+            self._conversations[conversation_id] = Conversation(
+                conversationId=conversation_id,  # USAR O ID CORRETO
+                messages=[],
+                status="active"
+            )
+            logger.info(f"✅ Conversa criada com ID: {conversation_id[:8]}...")
         
         # Adicionar mensagem ao histórico
         if conversation_id not in self._messages:
@@ -218,6 +226,8 @@ class ClaudeADKHostManager(ApplicationManager):
             history=[message]
         )
         self._tasks[task_id] = task
+        # Adicionar ao gerenciador de tasks para conversão automática
+        self.task_manager.add_a2a_task(task)
         self._pending_messages[task_id] = "Processando com Claude..."
         logger.info(f"📌 Task criada: {task_id[:8]}")
         
@@ -238,16 +248,52 @@ class ClaudeADKHostManager(ApplicationManager):
                 logger.warning("⚠️ Runner não inicializado, inicializando...")
                 await self.runner.initialize()
             
-            # Por enquanto, usar resposta fake para testar
-            logger.info(f"🚀 Processando: '{user_text[:30]}...'")
+            # Processar com ClaudeRunner real
+            logger.info(f"🚀 Chamando ClaudeRunner.run_async('{user_text[:30]}...', '{conversation_id[:8]}...')")
             
-            # TODO: Descomentar quando ClaudeRunner estiver funcionando
-            # result = await self.runner.run_async(user_text, conversation_id)
-            # response_text = result.get("response", "")
+            try:
+                # Consumir o AsyncGenerator do ClaudeRunner
+                response_text = ""
+                events_received = []
+                
+                logger.info(f"🔄 Consumindo eventos do ClaudeRunner (padrão yield/pause/resume)...")
+                async for event in self.runner.run_async(user_text, conversation_id):
+                    logger.info(f"📡 Evento: {event.get('type', 'unknown')}")
+                    events_received.append(event)
+                    
+                    # Processar diferentes tipos de eventos (yield/pause/resume pattern)
+                    if event.get("type") == "processing_start":
+                        logger.info("⏳ YIELD: Iniciando processamento")
+                        # PAUSE: Aqui o runner pausa para processar o evento
+                        
+                    elif event.get("type") == "input_registered":
+                        logger.info("📝 YIELD: Entrada registrada")
+                        # PAUSE: Aqui o runner pausa novamente
+                        
+                    elif event.get("type") == "response_generated":
+                        response_text = event.get("response", "")
+                        logger.info(f"💡 YIELD: Resposta gerada: {response_text[:50]}...")
+                        # PAUSE: Runner pausa para processar resposta
+                        
+                    elif event.get("type") == "processing_complete":
+                        # Evento final - RESUME completo
+                        if not response_text:
+                            response_text = event.get("response", "")
+                        logger.info(f"✅ RESUME: Processamento completo")
+                
+                # Se não houver resposta, usar fallback
+                if not response_text:
+                    response_text = f"[Sistema] Processando: {user_text[:50]}..."
+                    logger.warning("⚠️ Claude não retornou resposta, usando fallback")
+                    
+            except Exception as e:
+                # Em caso de erro, usar resposta de fallback
+                logger.warning(f"⚠️ Erro ao consumir eventos do ClaudeRunner: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
+                response_text = f"[Sistema] Echo: {user_text} (Claude temporariamente indisponível)"
             
-            # Resposta fake para teste
-            response_text = f"Echo: {user_text} (Resposta de teste - Claude ainda não integrado)"
-            logger.info(f"✅ Resposta gerada: {response_text[:100]}...")
+            logger.info(f"✅ Resposta obtida: {response_text[:100]}...")
             
             # Verificar se resposta é grande para usar artifacts
             if len(response_text) > 10000:  # Resposta maior que 10KB
@@ -309,6 +355,8 @@ class ClaudeADKHostManager(ApplicationManager):
             # Atualizar task
             task.status.state = TaskState.completed
             task.history.append(response_message)
+            # Atualizar no gerenciador de tasks
+            self.task_manager.update_task_status(task_id, TaskState.completed)
             
             # Emitir evento de conclusão
             await self.callback_manager.emit_event(
@@ -321,11 +369,13 @@ class ClaudeADKHostManager(ApplicationManager):
                 self._agents[0] if self._agents else None
             )
             
-            # Criar evento
+            # Criar evento com timestamp
+            import time
             self._events.append(Event(
                 id=str(uuid.uuid4()),
                 actor='claude',
-                content=response_message
+                content=response_message,
+                timestamp=time.time()  # Adicionar timestamp obrigatório
             ))
             
             # Remover de pendentes
@@ -342,6 +392,8 @@ class ClaudeADKHostManager(ApplicationManager):
             logger.error(f"   Stack trace:\n{traceback.format_exc()}")
             
             task.status.state = TaskState.failed
+            # Atualizar no gerenciador de tasks
+            self.task_manager.update_task_status(task_id, TaskState.failed)
             
             # Emitir evento de falha
             await self.callback_manager.emit_event(
