@@ -16,9 +16,15 @@ from a2a.types import (
 )
 from utils.agent_card import get_agent_card
 
-from service.server import test_image
 from service.server.application_manager import ApplicationManager
 from service.types import Conversation, Event
+
+
+def task_still_open(task: Task | None) -> bool:
+    """Check if a task is still open."""
+    if not task:
+        return False
+    return task.status.state in [TaskState.submitted, TaskState.streaming]
 
 
 class InMemoryFakeAgentManager(ApplicationManager):
@@ -95,7 +101,7 @@ class InMemoryFakeAgentManager(ApplicationManager):
         # incoming message (with ids attached).
         task = Task(
             id=taskid,
-            contextid=context_id,
+            context_id=contextid,
             status=TaskStatus(
                 state=TaskState.submitted,
                 message=message,
@@ -237,15 +243,14 @@ _contextId = str(uuid.uuid4())
 _message_queue: list[Message] = [
     Message(
         role=Role.agent,
-        parts=[Part(root=TextPart(text='Hello'))],
-        context_id=_contextId,
-        message_id=str(uuid.uuid4()),
+        parts=[TextPart(text='Hello')],
+        contextId=_contextId,
+        messageId=str(uuid.uuid4()),
     ),
     Message(
         role=Role.agent,
         parts=[
-            Part(
-                root=DataPart(
+            DataPart(
                     data={
                         'type': 'form',
                         'form': {
@@ -270,23 +275,21 @@ _message_queue: list[Message] = [
                         },
                         'instructions': 'Please provide your birthday and name',
                     }
-                )
-            ),
+                ),
         ],
-        context_id=_contextId,
-        message_id=str(uuid.uuid4()),
+        contextId=_contextId,
+        messageId=str(uuid.uuid4()),
     ),
     Message(
         role=Role.agent,
-        parts=[Part(root=TextPart(text='I like cats'))],
-        context_id=_contextId,
-        message_id=str(uuid.uuid4()),
+        parts=[TextPart(text='I like cats')],
+        contextId=_contextId,
+        messageId=str(uuid.uuid4()),
     ),
-    test_image.make_test_image(_contextId),
     Message(
         role=Role.agent,
-        parts=[Part(root=TextPart(text='And I like dogs'))],
-        context_id=_contextId,
-        message_id=str(uuid.uuid4()),
+        parts=[TextPart(text='And I like dogs')],
+        contextId=_contextId,
+        messageId=str(uuid.uuid4()),
     ),
 ]

@@ -63,8 +63,8 @@ def settings_page_content():
                     gap=30,
                 )
             ):
-                # API Key Settings Section
-                if not app_state.uses_vertex_ai:
+                # Claude Configuration Section
+                if hasattr(app_state, 'uses_claude') and app_state.uses_claude:
                     with me.box(
                         style=me.Style(
                             display='flex',
@@ -73,7 +73,7 @@ def settings_page_content():
                         )
                     ):
                         me.text(
-                            'Chave API do Google',
+                            'Claude Assistant - Configuração',
                             type='headline-6',
                             style=me.Style(
                                 margin=me.Margin(bottom=15),
@@ -84,65 +84,83 @@ def settings_page_content():
                         with me.box(
                             style=me.Style(
                                 display='flex',
-                                flex_direction='row',
+                                flex_direction='column',
                                 gap=10,
-                                align_items='center',
-                                margin=me.Margin(bottom=5),
+                                padding=me.Padding(top=15, bottom=15, left=15, right=15),
+                                background='#f0f4f8',
+                                border_radius=8,
                             )
                         ):
-                            me.input(
-                                label='Chave API',
-                                value=app_state.api_key,
-                                on_blur=on_api_key_change,
-                                type='password',
-                                appearance='outline',
-                                style=me.Style(width='400px'),
-                            )
-
-                            me.button(
-                                'Atualizar',
-                                type='raised',
-                                on_click=update_api_key,
-                                style=me.Style(
-                                    color=PRIMARY,  # Azul corporativo
-                                ),
-                            )
-
-                        # Success message
-                        if update_status.show_success:
                             with me.box(
                                 style=me.Style(
-                                    background=SUCCESS,  # Verde de sucesso
-                                    padding=me.Padding(
-                                        top=10, bottom=10, left=10, right=10
-                                    ),
-                                    border_radius=4,
-                                    margin=me.Margin(top=10),
                                     display='flex',
-                                    flex_direction='row',
                                     align_items='center',
-                                    width='400px',
+                                    gap=10,
                                 )
                             ):
                                 me.icon(
                                     'check_circle',
                                     style=me.Style(
-                                        color=TEXT_ON_PRIMARY,  # Texto branco
-                                        margin=me.Margin(right=10),
+                                        color=SUCCESS,
+                                        font_size=24,
                                     ),
                                 )
                                 me.text(
-                                    'Chave API atualizada com sucesso',
+                                    'Claude está ativo e funcionando',
                                     style=me.Style(
-                                        color=TEXT_ON_PRIMARY,  # Texto branco
+                                        font_weight='bold',
+                                        color='#2e7d32',
                                     ),
                                 )
+                            
+                            me.text(
+                                'O Claude utiliza a CLI local e não requer chave de API.',
+                                style=me.Style(
+                                    margin=me.Margin(top=10),
+                                    color='#666',
+                                ),
+                            )
+                            
+                            me.text(
+                                'Todas as conversas são processadas localmente através do Claude Code SDK.',
+                                style=me.Style(
+                                    margin=me.Margin(top=5),
+                                    color='#666',
+                                ),
+                            )
 
-                    # Add spacing instead of divider with style
+
+                # Legacy API Key Settings (Hidden when using Claude)
+                elif not app_state.uses_vertex_ai and not (hasattr(app_state, 'uses_claude') and app_state.uses_claude):
                     with me.box(
-                        style=me.Style(margin=me.Margin(top=10, bottom=10))
+                        style=me.Style(
+                            display='flex',
+                            flex_direction='column',
+                            margin=me.Margin(bottom=30),
+                        )
                     ):
-                        me.divider()
+                        me.text(
+                            'Configuração de API Key',
+                            type='headline-6',
+                            style=me.Style(
+                                margin=me.Margin(bottom=15),
+                                font_family='Google Sans',
+                            ),
+                        )
+                        
+                        me.text(
+                            'Nenhum provedor de IA configurado. Para usar Claude, defina USE_CLAUDE=TRUE no ambiente.',
+                            style=me.Style(
+                                color='#666',
+                                margin=me.Margin(bottom=10),
+                            ),
+                        )
+                
+                # Add spacing instead of divider with style
+                with me.box(
+                    style=me.Style(margin=me.Margin(top=10, bottom=10))
+                ):
+                    me.divider()
 
                 # Output Types Section
                 me.select(

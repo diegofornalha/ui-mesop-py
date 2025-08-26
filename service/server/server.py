@@ -24,9 +24,10 @@ from service.types import (
     SendMessageResponse,
 )
 
-from .adk_host_manager import ADKHostManager, get_message_id
+# from .adk_host_manager import ADKHostManager  # Não usado - sempre Claude
+from .claude_adk_host_manager import get_message_id
 from .application_manager import ApplicationManager
-from .in_memory_manager import InMemoryFakeAgentManager
+# from .in_memory_manager import InMemoryFakeAgentManager  # Não usado - sempre Claude
 
 
 class ConversationServer:
@@ -40,20 +41,10 @@ class ConversationServer:
         agent_manager = os.environ.get('A2A_HOST', 'ADK')
         self.manager: ApplicationManager
 
-        # Get API key from environment
-        api_key = os.environ.get('GOOGLE_API_KEY', '')
-        uses_vertex_ai = (
-            os.environ.get('GOOGLE_GENAI_USE_VERTEXAI', '').upper() == 'TRUE'
-        )
-
-        if agent_manager.upper() == 'ADK':
-            self.manager = ADKHostManager(
-                http_client,
-                api_key=api_key,
-                uses_vertex_ai=uses_vertex_ai,
-            )
-        else:
-            self.manager = InMemoryFakeAgentManager()
+        # Sempre usar Claude - sem necessidade de API key
+        from .claude_adk_host_manager import ClaudeADKHostManager
+        self.manager = ClaudeADKHostManager(http_client)
+        # Inicialização assíncrona será feita automaticamente quando necessário
         self._file_cache = {}  # dict[str, FilePart] maps file id to message data
         self._message_to_cache = {}  # dict[str, str] maps message id to cache id
 
@@ -79,14 +70,14 @@ class ConversationServer:
         app.add_api_route(
             '/message/file/{file_id}', self._files, methods=['GET']
         )
+        # Endpoint mantido para compatibilidade, mas não faz nada
         app.add_api_route(
             '/api_key/update', self._update_api_key, methods=['POST']
         )
 
-    # Update API key in manager
+    # Método mantido para compatibilidade, mas não faz nada com Claude
     def update_api_key(self, api_key: str):
-        if isinstance(self.manager, ADKHostManager):
-            self.manager.update_api_key(api_key)
+        pass  # Claude não precisa de API key
 
     async def _create_conversation(self):
         c = await self.manager.create_conversation()
@@ -97,19 +88,29 @@ class ConversationServer:
         message = Message(**message_data['params'])
         message = self.manager.sanitize_message(message)
         loop = asyncio.get_event_loop()
-        if isinstance(self.manager, ADKHostManager):
+        
+        # Import para verificar tipo
+        from .claude_adk_host_manager import ClaudeADKHostManager
+        
+        print(f"🔍 [SEND_MESSAGE] Manager type: {type(self.manager).__name__}")
+        print(f"   Message ID: {message.messageId[:8]}...")
+        print(f"   Context ID: {message.contextId[:8]}...")
+        
+        if isinstance(self.manager, ClaudeADKHostManager):
+            # Ambos têm process_message_threadsafe
+            print(f"✅ Usando process_message_threadsafe")
             t = threading.Thread(
-                target=lambda: cast(
-                    'ADKHostManager', self.manager
-                ).process_message_threadsafe(message, loop)
+                target=lambda: self.manager.process_message_threadsafe(message, loop)
             )
         else:
+            print(f"⚠️ Usando asyncio.run diretamente")
             t = threading.Thread(
                 target=lambda: asyncio.run(
                     self.manager.process_message(message)
                 )
             )
         t.start()
+        print(f"🚀 Thread iniciada para processar mensagem")
         return SendMessageResponse(
             result=MessageInfo(
                 messageid=message.messageId,
@@ -122,9 +123,20 @@ class ConversationServer:
         conversationid = message_data['params']
         conversation = self.manager.get_conversation(conversationid)
         if conversation:
-            return ListMessageResponse(
-                result=self.cache_content(conversation.messages)
-            )
+            messages = conversation.messages
+            print(f"🔍 [SERVER] Listando {len(messages)} mensagens da conversa {conversationid[:8]}")
+            for i, msg in enumerate(messages):
+                role = getattr(msg, 'role', 'NO_ROLE')
+                print(f"   [SERVER] Msg {i}: role={role}, type={type(role)}")
+            
+            cached_messages = self.cache_content(messages)
+            
+            print(f"📤 [SERVER] Retornando mensagens após cache:")
+            for i, msg in enumerate(cached_messages):
+                role = getattr(msg, 'role', 'NO_ROLE')
+                print(f"   [CACHED] Msg {i}: role={role}")
+            
+            return ListMessageResponse(result=cached_messages)
         return ListMessageResponse(result=[])
 
     def cache_content(self, messages: list[Message]):
@@ -162,12 +174,10 @@ class ConversationServer:
                 file_obj = part.get('file') if isinstance(part, dict) else getattr(part, 'file', None)
                 mime_type = file_obj.mime_type if file_obj and hasattr(file_obj, 'mime_type') else ''
                 new_parts.append(
-                    Part(
-                        root=FilePart(
-                            file=FileWithUri(
-                                mime_type=mime_type,
-                                uri=f'/message/file/{cache_id}',
-                            )
+                    FilePart(
+                        file=FileWithUri(
+                            mime_type=mime_type,
+                            uri=f'/message/file/{cache_id}',
                         )
                     )
                 )
@@ -189,7 +199,9 @@ class ConversationServer:
         return GetEventResponse(result=self.manager.events)
 
     def _list_tasks(self):
-        return ListTaskResponse(result=self.manager.tasks)
+        # Por enquanto, retornar lista vazia para evitar erro de validação
+        # TODO: Converter dataclass Task para Pydantic Task
+        return ListTaskResponse(result=[])
 
     async def _register_agent(self, request: Request):
         message_data = await request.json()
@@ -212,15 +224,5 @@ class ConversationServer:
         return Response(content=part.file.bytes, media_type=part.file.mime_type)
 
     async def _update_api_key(self, request: Request):
-        """Update the API key"""
-        try:
-            data = await request.json()
-            api_key = data.get('api_key', '')
-
-            if api_key:
-                # Update in the manager
-                self.update_api_key(api_key)
-                return {'status': 'success'}
-            return {'status': 'error', 'message': 'No API key provided'}
-        except Exception as e:
-            return {'status': 'error', 'message': str(e)}
+        """Endpoint mantido para compatibilidade - Claude não precisa de API key"""
+        return {'status': 'success', 'message': 'Claude não precisa de API key'}

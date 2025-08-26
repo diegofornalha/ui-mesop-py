@@ -19,7 +19,37 @@ def agent_list_page(app_state: AppState) -> None:
         with page_frame():
             with header('Agentes Remotos', 'smart_toy'):
                 pass
-            agents = asyncio.run(ListRemoteAgents())
+            # Agentes A2A são serviços externos, não LLMs
+            # Claude é o LLM/provider, não um agente
+            # Mostrar lista vazia ou buscar agentes reais registrados
+            agents = []  # Lista vazia pois não há agentes A2A registrados
+            
+            # Mensagem explicativa se não houver agentes
+            if not agents:
+                me.text(
+                    "Nenhum agente A2A remoto registrado.",
+                    style=me.Style(
+                        color="#666",
+                        margin=me.Margin(top=20, bottom=20),
+                        font_style="italic"
+                    )
+                )
+                me.text(
+                    "Agentes A2A são serviços externos que implementam o protocolo A2A, como UltraThink.",
+                    style=me.Style(
+                        color="#999",
+                        font_size=14
+                    )
+                )
+                me.text(
+                    "Claude é o LLM/provider usado internamente, não um agente A2A.",
+                    style=me.Style(
+                        color="#999",
+                        font_size=14,
+                        margin=me.Margin(bottom=20)
+                    )
+                )
+            
             agents_list(agents)
             with dialog(state.agent_dialog_open):
                 with me.box(

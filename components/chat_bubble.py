@@ -39,7 +39,7 @@ def chat_box(
     with me.box(
         style=me.Style(
             display='flex',
-            justify_content=('space-between' if role == 'agent' else 'end'),
+            justify_content=('start' if role == 'agent' else 'end'),
             min_width=500,
         ),
         key=key,
@@ -86,7 +86,7 @@ def chat_box(
         with me.box(
             style=me.Style(
                 display='flex',
-                justify_content=('space-between' if role == 'user' else 'end'),
+                justify_content=('end' if role == 'user' else 'start'),
                 min_width=500,
             ),
             key=key,

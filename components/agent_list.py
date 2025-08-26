@@ -25,16 +25,16 @@ def agents_list(
         df_data['Nome'].append(agent_info.name)
         df_data['Descrição'].append(agent_info.description)
         df_data['Organização'].append(
-            agent_info.provider.organization if agent_info.provider else ''
+            getattr(agent_info.provider, 'organization', '') if hasattr(agent_info, 'provider') and agent_info.provider else ''
         )
-        df_data['Modos de Entrada'].append(', '.join(agent_info.default_input_modes))
+        df_data['Modos de Entrada'].append(', '.join(getattr(agent_info, 'defaultInputModes', getattr(agent_info, 'default_input_modes', []))))
         df_data['Modos de Saída'].append(
-            ', '.join(agent_info.default_output_modes)
+            ', '.join(getattr(agent_info, 'defaultOutputModes', getattr(agent_info, 'default_output_modes', [])))
         )
-        df_data['Streaming'].append(agent_info.capabilities.streaming)
+        df_data['Streaming'].append(getattr(agent_info.capabilities, 'streaming', False) if hasattr(agent_info, 'capabilities') and agent_info.capabilities else False)
         df_data['Extensões'].append(
             ', '.join([ext.uri for ext in agent_info.capabilities.extensions])
-            if agent_info.capabilities.extensions
+            if hasattr(agent_info, 'capabilities') and agent_info.capabilities and hasattr(agent_info.capabilities, 'extensions') and agent_info.capabilities.extensions
             else ''
         )
     df = pd.DataFrame(

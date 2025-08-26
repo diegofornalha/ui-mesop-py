@@ -48,7 +48,7 @@ async def send_message(message: str, message_id: str = ''):
         messageId=message_id,
         contextId=state.conversationid,
         role=Role.user,
-        parts=[Part(root=TextPart(text=message))],
+        parts=[TextPart(text=message)],
     )
     # Add message to state until refresh replaces it.
     state_message = convert_message_to_state(request)
